@@ -1,8 +1,8 @@
 CFLAGS = -g -g3 -ggdb -gdwarf-4 -O0
 
-.PHONY : readelf clean
+.PHONY : readelf-riscv clean
 
 readelf : lib/readelf/readelf.c
-	gcc $(CFLAGS) lib/readelf/readelf.c -o readelf
+	gcc $(CFLAGS) lib/readelf/readelf.c -o readelf-riscv
 clean :
-	-rm -rf readelf
+	-rm -rf readelf-riscv
