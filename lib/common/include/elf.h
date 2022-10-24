@@ -37,6 +37,36 @@ typedef uint16_t Elf64_Section;
 typedef Elf32_Half Elf32_Versym;
 typedef Elf64_Half Elf64_Versym;
 
+typedef unsigned long bfd_vma;
+typedef unsigned long bfd_size_type;
+
+/* Fields in e_ident[].  */
+
+#define EI_MAG0		0	/* File identification byte 0 index */
+#define ELFMAG0		   0x7F	/* Magic number byte 0 */
+
+#define EI_MAG1		1	/* File identification byte 1 index */
+#define ELFMAG1		    'E'	/* Magic number byte 1 */
+
+#define EI_MAG2		2	/* File identification byte 2 index */
+#define ELFMAG2		    'L'	/* Magic number byte 2 */
+
+#define EI_MAG3		3	/* File identification byte 3 index */
+#define ELFMAG3		    'F'	/* Magic number byte 3 */
+
+#define EI_CLASS	4	/* File class */
+#define ELFCLASSNONE	      0	/* Invalid class */
+#define ELFCLASS32	      1	/* 32-bit objects */
+#define ELFCLASS64	      2	/* 64-bit objects */
+
+#define EI_DATA		5	/* Data encoding */
+#define ELFDATANONE	      0	/* Invalid data encoding */
+#define ELFDATA2LSB	      1	/* 2's complement, little endian */
+#define ELFDATA2MSB	      2	/* 2's complement, big endian */
+
+#define EI_VERSION	6	/* File version */
+
+#define EI_OSABI	7	/* Operating System/ABI indication */
 
 /* The ELF file header.  This appears at the start of every ELF file.  */
 
@@ -49,8 +79,8 @@ typedef struct
   Elf32_Half	e_machine;		/* Architecture */
   Elf32_Word	e_version;		/* Object file version */
   Elf32_Addr	e_entry;		/* Entry point virtual address */
-  Elf32_Off	e_phoff;		/* Program header table file offset */
-  Elf32_Off	e_shoff;		/* Section header table file offset */
+  Elf32_Off	    e_phoff;		/* Program header table file offset */
+  Elf32_Off	    e_shoff;		/* Section header table file offset */
   Elf32_Word	e_flags;		/* Processor-specific flags */
   Elf32_Half	e_ehsize;		/* ELF header size in bytes */
   Elf32_Half	e_phentsize;		/* Program header table entry size */
@@ -109,7 +139,41 @@ typedef struct
   Elf64_Xword	sh_entsize;		/* Entry size if section holds table */
 } Elf64_Shdr;
 
+typedef struct elf_internal_ehdr {
+  unsigned char		e_ident[EI_NIDENT]; /* ELF "magic number" */
+  bfd_vma		    e_entry;	/* Entry point virtual address */
+  bfd_size_type		e_phoff;	/* Program header table file offset */
+  bfd_size_type		e_shoff;	/* Section header table file offset */
+  unsigned long		e_version;	/* Identifies object file version */
+  unsigned long		e_flags;	/* Processor-specific flags */
+  unsigned short	e_type;		/* Identifies object file type */
+  unsigned short	e_machine;	/* Specifies required architecture */
+  unsigned int		e_ehsize;	/* ELF header size in bytes */
+  unsigned int		e_phentsize;	/* Program header table entry size */
+  unsigned int		e_phnum;	/* Program header table entry count */
+  unsigned int		e_shentsize;	/* Section header table entry size */
+  unsigned int		e_shnum;	/* Section header table entry count */
+  unsigned int		e_shstrndx;	/* Section header string table index */
+} Elf_Internal_Ehdr;
 
+
+// typedef struct elf_internal_shdr {
+//   unsigned int	sh_name;		/* Section name, index in string tbl */
+//   unsigned int	sh_type;		/* Type of section */
+//   bfd_vma	sh_flags;		/* Miscellaneous section attributes */
+//   bfd_vma	sh_addr;		/* Section virtual addr at execution in
+// 					   octets.  */
+//   file_ptr	sh_offset;		/* Section file offset in octets.  */
+//   bfd_size_type	sh_size;		/* Size of section in octets.  */
+//   unsigned int	sh_link;		/* Index of another section */
+//   unsigned int	sh_info;		/* Additional section information */
+//   bfd_vma	sh_addralign;		/* Section alignment */
+//   bfd_size_type	sh_entsize;		/* Entry size if section holds table */
+
+//   /* The internal rep also has some cached info associated with it. */
+//   asection *	bfd_section;		/* Associated BFD section.  */
+//   unsigned char *contents;		/* Section contents.  */
+// } Elf_Internal_Shdr;
 
 typedef struct filedata
 {
@@ -117,11 +181,11 @@ typedef struct filedata
   FILE *               handle;
   bfd_size_type        file_size;
   Elf_Internal_Ehdr    file_header;
-  Elf_Internal_Shdr *  section_headers;
-  Elf_Internal_Phdr *  program_headers;
+//   Elf_Internal_Shdr *  section_headers;
+//   Elf_Internal_Phdr *  program_headers;
   char *               string_table;
   unsigned long        string_table_length;
-  elf_section_list *   symtab_shndx_list;
+//   elf_section_list *   symtab_shndx_list;
 } Filedata;
 
 
@@ -132,9 +196,5 @@ typedef struct filedata
 
 
 #define	ENOENT		 2	/* No such file or directory */
-
-#define	false		 -1	/* No such file or directory */
-#define	true		 0	/* No such file or directory */
-
 
 #endif
