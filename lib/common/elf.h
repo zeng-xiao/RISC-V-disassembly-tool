@@ -67,8 +67,8 @@ typedef struct
   Elf64_Half	e_machine;		/* Architecture */
   Elf64_Word	e_version;		/* Object file version */
   Elf64_Addr	e_entry;		/* Entry point virtual address */
-  Elf64_Off	e_phoff;		/* Program header table file offset */
-  Elf64_Off	e_shoff;		/* Section header table file offset */
+  Elf64_Off	    e_phoff;		/* Program header table file offset */
+  Elf64_Off	    e_shoff;		/* Section header table file offset */
   Elf64_Word	e_flags;		/* Processor-specific flags */
   Elf64_Half	e_ehsize;		/* ELF header size in bytes */
   Elf64_Half	e_phentsize;		/* Program header table entry size */
@@ -87,7 +87,7 @@ typedef struct
   Elf32_Word	sh_type;		/* Section type */
   Elf32_Word	sh_flags;		/* Section flags */
   Elf32_Addr	sh_addr;		/* Section virtual addr at execution */
-  Elf32_Off	sh_offset;		/* Section file offset */
+  Elf32_Off	    sh_offset;		/* Section file offset */
   Elf32_Word	sh_size;		/* Section size in bytes */
   Elf32_Word	sh_link;		/* Link to another section */
   Elf32_Word	sh_info;		/* Additional section information */
@@ -101,7 +101,7 @@ typedef struct
   Elf64_Word	sh_type;		/* Section type */
   Elf64_Xword	sh_flags;		/* Section flags */
   Elf64_Addr	sh_addr;		/* Section virtual addr at execution */
-  Elf64_Off	sh_offset;		/* Section file offset */
+  Elf64_Off	    sh_offset;		/* Section file offset */
   Elf64_Xword	sh_size;		/* Section size in bytes */
   Elf64_Word	sh_link;		/* Link to another section */
   Elf64_Word	sh_info;		/* Additional section information */
@@ -109,6 +109,32 @@ typedef struct
   Elf64_Xword	sh_entsize;		/* Entry size if section holds table */
 } Elf64_Shdr;
 
+
+
+typedef struct filedata
+{
+  const char *         file_name;
+  FILE *               handle;
+  bfd_size_type        file_size;
+  Elf_Internal_Ehdr    file_header;
+  Elf_Internal_Shdr *  section_headers;
+  Elf_Internal_Phdr *  program_headers;
+  char *               string_table;
+  unsigned long        string_table_length;
+  elf_section_list *   symtab_shndx_list;
+} Filedata;
+
+
+
+
+
+
+
+
 #define	ENOENT		 2	/* No such file or directory */
-#define	FALSE		 -1	/* No such file or directory */
+
+#define	false		 -1	/* No such file or directory */
+#define	true		 0	/* No such file or directory */
+
+
 #endif
