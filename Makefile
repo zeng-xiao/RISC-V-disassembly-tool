@@ -1,13 +1,13 @@
-CFLAGS = -g3 -ggdb -gdwarf -O0 -Werror
+TOPDIR=./
 
-.PHONY : readelf-riscv clean
+exclude_dirs= include bin lib 
+export exclude_dirs
 
-readelf-riscv : lib/readelf/readelf.c
-	gcc $(CFLAGS) -I./lib/readelf/include -I../common/include lib/readelf/readelf.c lib/readelf/elfHeader.c -o readelf-riscv
+.PHONY=all
+all:
+	make -f $(TOPDIR)/Makefile.env all
 
-
-run-readelf-riscv : readelf-riscv
-	./readelf-riscv ~/code/riscv/dwarf_relocations/add.c.S.o
-
-clean :
-	-rm -rf readelf-riscv
+.PHONY=clean
+clean:
+	make -f $(TOPDIR)/Makefile.env clean
+	rm -rf build bin
