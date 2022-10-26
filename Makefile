@@ -1,11 +1,21 @@
-TOPDIR=./
+TOPDIR=$(shell pwd)
 
-exclude_dirs= include bin lib 
+BINPATH=$(TOPDIR)/bin
+BUILDPATH=$(TOPDIR)/build
+export BINPATH BUILDPATH
+
+exclude_dirs= bin build include
 export exclude_dirs
 
 .PHONY=all
-all:
+all: $(BINPATH) $(BUILDPATH)
 	make -f $(TOPDIR)/Makefile.env all
+
+$(BINPATH):
+	mkdir -p $(BINPATH)
+
+$(BUILDPATH):
+	mkdir -p $(BUILDPATH)
 
 .PHONY=clean
 clean:
