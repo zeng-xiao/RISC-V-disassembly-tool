@@ -6,112 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "dataOperate.h"
 #include "elf.h"
 
-uint64_t byte_get_little_endian(const unsigned char *field, int size) {
-  switch (size) {
-  case 1:
-    return *field;
-
-  case 2:
-    return ((unsigned int)(field[0])) | (((unsigned int)(field[1])) << 8);
-
-  case 3:
-    return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-           (((uint64_t)(field[2])) << 16);
-
-  case 4:
-    return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-           (((uint64_t)(field[2])) << 16) | (((uint64_t)(field[3])) << 24);
-
-  case 5:
-    if (sizeof(uint64_t) == 8)
-      return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-             (((uint64_t)(field[2])) << 16) | (((uint64_t)(field[3])) << 24) |
-             (((uint64_t)(field[4])) << 32);
-    else if (sizeof(uint64_t) == 4)
-      /* We want to extract data from an 8 byte wide field and
-         place it into a 4 byte wide field.  Since this is a little
-         endian source we can just use the 4 byte extraction code.  */
-      return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-             (((uint64_t)(field[2])) << 16) | (((uint64_t)(field[3])) << 24);
-    /* Fall through.  */
-
-  case 6:
-    if (sizeof(uint64_t) == 8)
-      return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-             (((uint64_t)(field[2])) << 16) | (((uint64_t)(field[3])) << 24) |
-             (((uint64_t)(field[4])) << 32) | (((uint64_t)(field[5])) << 40);
-    else if (sizeof(uint64_t) == 4)
-      /* We want to extract data from an 8 byte wide field and
-         place it into a 4 byte wide field.  Since this is a little
-         endian source we can just use the 4 byte extraction code.  */
-      return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-             (((uint64_t)(field[2])) << 16) | (((uint64_t)(field[3])) << 24);
-    /* Fall through.  */
-
-  case 7:
-    if (sizeof(uint64_t) == 8)
-      return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-             (((uint64_t)(field[2])) << 16) | (((uint64_t)(field[3])) << 24) |
-             (((uint64_t)(field[4])) << 32) | (((uint64_t)(field[5])) << 40) |
-             (((uint64_t)(field[6])) << 48);
-    else if (sizeof(uint64_t) == 4)
-      /* We want to extract data from an 8 byte wide field and
-         place it into a 4 byte wide field.  Since this is a little
-         endian source we can just use the 4 byte extraction code.  */
-      return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-             (((uint64_t)(field[2])) << 16) | (((uint64_t)(field[3])) << 24);
-    /* Fall through.  */
-
-  case 8:
-    if (sizeof(uint64_t) == 8)
-      return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-             (((uint64_t)(field[2])) << 16) | (((uint64_t)(field[3])) << 24) |
-             (((uint64_t)(field[4])) << 32) | (((uint64_t)(field[5])) << 40) |
-             (((uint64_t)(field[6])) << 48) | (((uint64_t)(field[7])) << 56);
-    else if (sizeof(uint64_t) == 4)
-      /* We want to extract data from an 8 byte wide field and
-         place it into a 4 byte wide field.  Since this is a little
-         endian source we can just use the 4 byte extraction code.  */
-      return ((uint64_t)(field[0])) | (((uint64_t)(field[1])) << 8) |
-             (((uint64_t)(field[2])) << 16) | (((uint64_t)(field[3])) << 24);
-    /* Fall through.  */
-
-  default:
-    printf("Unhandled data length: %d\n", size);
-    abort();
-  }
-}
-
-void byte_put_little_endian(unsigned char *field, uint64_t value, int size) {
-  switch (size) {
-  case 8:
-    field[7] = (((value >> 24) >> 24) >> 8) & 0xff;
-    field[6] = ((value >> 24) >> 24) & 0xff;
-    field[5] = ((value >> 24) >> 16) & 0xff;
-    field[4] = ((value >> 24) >> 8) & 0xff;
-    /* Fall through.  */
-  case 4:
-    field[3] = (value >> 24) & 0xff;
-    /* Fall through.  */
-  case 3:
-    field[2] = (value >> 16) & 0xff;
-    /* Fall through.  */
-  case 2:
-    field[1] = (value >> 8) & 0xff;
-    /* Fall through.  */
-  case 1:
-    field[0] = value & 0xff;
-    break;
-
-  default:
-    printf("Unhandled data length: %d\n", size);
-    abort();
-  }
-}
-
-int elfHdrIdent(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static int elfHdrIdent(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   if (elfHdr->e_ident[EI_MAG0] != ELFMAG0 ||
       elfHdr->e_ident[EI_MAG1] != ELFMAG1 ||
       elfHdr->e_ident[EI_MAG2] != ELFMAG2 ||
@@ -134,7 +32,7 @@ int elfHdrIdent(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   return 0;
 }
 
-void elfHdrType(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrType(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   switch (elfHdr->e_type) {
   case ET_NONE:
     elfInfo->i_type = "NONE (None)";
@@ -158,7 +56,7 @@ void elfHdrType(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   }
 }
 
-void elfHdrMachine(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrMachine(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   switch (elfHdr->e_machine) {
   case EM_RISCV:
     elfInfo->i_machine = "RISC-V";
@@ -170,39 +68,39 @@ void elfHdrMachine(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   }
 }
 
-int elfHdrVersion(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static int elfHdrVersion(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   if (elfHdr->e_version != elfHdr->e_ident[EI_VERSION])
     return false;
   elfInfo->i_version = elfHdr->e_version;
   return 0;
 }
 
-int elfHdrFlags(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static int elfHdrFlags(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   if (elfHdr->e_version != elfHdr->e_ident[EI_VERSION])
     return false;
 
   if (elfHdr->e_machine == EM_RISCV) {
     if (elfHdr->e_flags & EF_RISCV_RVC)
-      elfInfo->i_flagStatement = ", RVC";
+      strcat(elfInfo->i_flagStatement, ", RVC");
 
     if (elfHdr->e_flags & EF_RISCV_RVE)
-      elfInfo->i_flagStatement = ", RVE";
+      strcat(elfInfo->i_flagStatement, ", RVE");
 
     switch (elfHdr->e_flags & EF_RISCV_FLOAT_ABI) {
     case EF_RISCV_FLOAT_ABI_SOFT:
-      elfInfo->i_flagStatement = ", soft-float ABI";
+      strcat(elfInfo->i_flagStatement, ", soft-float ABI");
       break;
 
     case EF_RISCV_FLOAT_ABI_SINGLE:
-      elfInfo->i_flagStatement = ", single-float ABI";
+      strcat(elfInfo->i_flagStatement, ", single-float ABI");
       break;
 
     case EF_RISCV_FLOAT_ABI_DOUBLE:
-      elfInfo->i_flagStatement = ", double-float ABI";
+      strcat(elfInfo->i_flagStatement, ", double-float ABI");
       break;
 
     case EF_RISCV_FLOAT_ABI_QUAD:
-      elfInfo->i_flagStatement = ", quad-float ABI";
+      strcat(elfInfo->i_flagStatement, ", quad-float ABI");
       break;
 
     default:
@@ -213,50 +111,47 @@ int elfHdrFlags(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   return 0;
 }
 
-void elfHdrEntry(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrEntry(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_entry = elfHdr->e_entry;
 }
 
-void elfHdrPhoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrPhoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_phoff = elfHdr->e_phoff;
 }
 
-void elfHdrShoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrShoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_shoff = elfHdr->e_shoff;
 }
 
-void elfHdrFlag(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrFlag(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_flags = elfHdr->e_flags;
 }
 
-void elfHdrFlag(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_flags = elfHdr->e_flags;
-}
-
-void elfHdrEhsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrEhsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_ehsize = elfHdr->e_ehsize;
 }
 
-void elfHdrPhentsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrPhentsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_phentsize = elfHdr->e_phentsize;
 }
 
-void elfHdrPhnum(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrPhnum(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_phnum = elfHdr->e_phnum;
 }
 
-void elfHdrShentsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrShentsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_shentsize = elfHdr->e_shentsize;
 }
 
-void elfHdrShnum(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static void elfHdrShnum(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_shnum = elfHdr->e_shnum;
 }
-void elfHdrFlag(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+
+static void elfHdrShstrndx(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_shstrndx = elfHdr->e_shstrndx;
 }
 
-void printfElf64Header(Elf64_Info_Ehdr *elfInfo) {
+static void printfElf64Header(Elf64_Info_Ehdr *elfInfo) {
   fprintf(stderr, "\n\n");
   fprintf(stderr, "ELF Header:\n");
 
@@ -339,6 +234,16 @@ int processElfHeader(const char *inputFileName) {
   elfHdrType(&elfHdr, &infoElf64Hdr);
   elfHdrMachine(&elfHdr, &infoElf64Hdr);
   elfHdrVersion(&elfHdr, &infoElf64Hdr);
+  elfHdrEntry(&elfHdr, &infoElf64Hdr);
+  elfHdrPhoff(&elfHdr, &infoElf64Hdr);
+  elfHdrShoff(&elfHdr, &infoElf64Hdr);
+  elfHdrFlag(&elfHdr, &infoElf64Hdr);
+  elfHdrEhsize(&elfHdr, &infoElf64Hdr);
+  elfHdrPhentsize(&elfHdr, &infoElf64Hdr);
+  elfHdrPhnum(&elfHdr, &infoElf64Hdr);
+  elfHdrShentsize(&elfHdr, &infoElf64Hdr);
+  elfHdrShnum(&elfHdr, &infoElf64Hdr);
+  elfHdrShstrndx(&elfHdr, &infoElf64Hdr);
   elfHdrFlags(&elfHdr, &infoElf64Hdr);
 
   printfElf64Header(&infoElf64Hdr);

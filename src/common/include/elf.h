@@ -217,38 +217,6 @@ typedef struct elf_internal_ehdr {
   unsigned int e_shstrndx;          /* Section header string table index */
 } Elf_Internal_Ehdr;
 
-// typedef struct elf_internal_shdr {
-//   unsigned int	sh_name;		/* Section name, index in string
-//   tbl
-//   */ unsigned int	sh_type;		/* Type of section */ bfd_vma
-//   sh_flags;		/* Miscellaneous section attributes */ bfd_vma	sh_addr;
-//   /* Section virtual addr at execution in
-// 					   octets.  */
-//   file_ptr	sh_offset;		/* Section file offset in octets.  */
-//   bfd_size_type	sh_size;		/* Size of section in octets. */
-//   unsigned int	sh_link;		/* Index of another section */
-//   unsigned int	sh_info;		/* Additional section
-//   information
-//   */ bfd_vma	sh_addralign;		/* Section alignment */ bfd_size_type
-//   sh_entsize;		/* Entry size if section holds table */
-
-//   /* The internal rep also has some cached info associated with it. */
-//   asection *	bfd_section;		/* Associated BFD section.  */
-//   unsigned char *contents;		/* Section contents.  */
-// } Elf_Internal_Shdr;
-
-typedef struct filedata {
-  const char *file_name;
-  FILE *handle;
-  bfd_size_type file_size;
-  Elf_Internal_Ehdr file_header;
-  //   Elf_Internal_Shdr *  section_headers;
-  //   Elf_Internal_Phdr *  program_headers;
-  char *string_table;
-  unsigned long string_table_length;
-  //   elf_section_list *   symtab_shndx_list;
-} Filedata;
-
 #define ENOENT 2 /* No such file or directory */
 
 #endif
