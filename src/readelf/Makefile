@@ -6,7 +6,7 @@ LIB=libreadelf.a
 
 
 
-INCLUDEPATH=./include ../common/include
+INCLUDEPATH=./include -I ../common/include
 
 LIBPATH=$(TOPDIR)/lib
 

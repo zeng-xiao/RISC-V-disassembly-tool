@@ -17,6 +17,9 @@ $(BINPATH):
 $(BUILDPATH):
 	mkdir -p $(BUILDPATH)
 
+readelf : $(BINPATH)/readelf-riscv
+	$(BINPATH)/readelf-riscv /home/user/code/riscv/dwarf_relocations/add.c.S.o
+
 .PHONY=clean
 clean:
 	make -f $(TOPDIR)/Makefile.env clean
