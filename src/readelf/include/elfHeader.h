@@ -54,10 +54,13 @@ typedef struct {
 
   const char *i_class;
   const char *i_dataEncodingForm;
-  const char *i_type;    /* Object file type */
-  const char *i_machine; /* Architecture */
+  uint32_t i_fileVersion; /* File version */
+  const char *i_osAbi;
+  uint32_t i_abiVersion; /* ABI version */
 
-  uint32_t i_version;        /* Object file version */
+  const char *i_type;        /* Object file type */
+  const char *i_machine;     /* Architecture */
+  uint32_t i_objectVersion;  /* Object file version */
   uint64_t i_entry;          /* Entry point virtual address */
   uint64_t i_phoff;          /* Program header table file offset */
   uint64_t i_shoff;          /* Section header table file offset */

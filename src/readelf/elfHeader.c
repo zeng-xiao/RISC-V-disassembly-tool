@@ -9,6 +9,8 @@
 #include "elfHeader.h"
 
 static int elfHdrIdent(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+  strcpy(elfInfo->i_ident, elfHdr->e_ident);
+
   if (elfHdr->e_ident[EI_MAG0] != ELFMAG0 ||
       elfHdr->e_ident[EI_MAG1] != ELFMAG1 ||
       elfHdr->e_ident[EI_MAG2] != ELFMAG2 ||
@@ -28,6 +30,30 @@ static int elfHdrIdent(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
     elfInfo->i_dataEncodingForm = "2's complement, big endian";
   else
     return false;
+
+  elfInfo->i_fileVersion = elfHdr->e_ident[EI_VERSION];
+
+  switch (elfHdr->e_ident[EI_OSABI]) {
+  case ELFOSABI_NONE:
+    elfInfo->i_osAbi = "UNIX - System V";
+    break;
+  case ELFOSABI_HPUX:
+    elfInfo->i_osAbi = "UNIX - HP-UX";
+    break;
+  case ELFOSABI_NETBSD:
+    elfInfo->i_osAbi = "UNIX - NetBSD";
+    break;
+  case ELFOSABI_GNU:
+    elfInfo->i_osAbi = "UNIX - GNU";
+    break;
+  case ELFOSABI_SOLARIS:
+    elfInfo->i_osAbi = "UNIX - Solaris";
+    break;
+  default:
+    printf("Unsupported OS ABI\n");
+    abort();
+  }
+  elfInfo->i_abiVersion = elfHdr->e_ident[EI_ABIVERSION];
   return 0;
 }
 
@@ -67,16 +93,27 @@ static void elfHdrMachine(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   }
 }
 
-static int elfHdrVersion(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+static int elfHdrObjectVersion(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   if (elfHdr->e_version != elfHdr->e_ident[EI_VERSION])
     return false;
-  elfInfo->i_version = elfHdr->e_version;
+  elfInfo->i_objectVersion = elfHdr->e_version;
   return 0;
 }
 
-static int elfHdrFlags(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  if (elfHdr->e_version != elfHdr->e_ident[EI_VERSION])
-    return false;
+static void elfHdrEntry(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_entry = elfHdr->e_entry;
+}
+
+static void elfHdrPhoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_phoff = elfHdr->e_phoff;
+}
+
+static void elfHdrShoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_shoff = elfHdr->e_shoff;
+}
+
+static void elfHdrFlag(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_flags = elfHdr->e_flags;
 
   if (elfHdr->e_machine == EM_RISCV) {
     if (elfHdr->e_flags & EF_RISCV_RVC)
@@ -107,23 +144,6 @@ static int elfHdrFlags(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
       abort();
     }
   }
-  return 0;
-}
-
-static void elfHdrEntry(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_entry = elfHdr->e_entry;
-}
-
-static void elfHdrPhoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_phoff = elfHdr->e_phoff;
-}
-
-static void elfHdrShoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_shoff = elfHdr->e_shoff;
-}
-
-static void elfHdrFlag(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_flags = elfHdr->e_flags;
 }
 
 static void elfHdrEhsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
@@ -163,11 +183,17 @@ static void printfElf64Header(Elf64_Info_Ehdr *elfInfo) {
           elfInfo->i_class);
   fprintf(stderr, "  Data Encoding Form:                %s\n",
           elfInfo->i_dataEncodingForm);
+  fprintf(stderr, "  File Version:                      %u (current)\n",
+          elfInfo->i_fileVersion);
   fprintf(stderr, "  Elf Type:                          %s\n", elfInfo->i_type);
   fprintf(stderr, "  Machine:                           %s\n",
           elfInfo->i_machine);
-  fprintf(stderr, "  Version:                           %u\n",
-          elfInfo->i_version);
+  fprintf(stderr, "  Object Version:                    %u\n",
+          elfInfo->i_objectVersion);
+  fprintf(stderr, "  OS/ABI:                            %s\n",
+          elfInfo->i_osAbi);
+  fprintf(stderr, "  ABI Version:                       %u\n",
+          elfInfo->i_abiVersion);
   fprintf(stderr, "  Entry point address:               0x%lx\n",
           elfInfo->i_entry);
   fprintf(stderr,
@@ -201,8 +227,9 @@ int processElfHeader(const char *inputFileName) {
   fread(externalElf64Hdr.e_ident, EI_NIDENT, 1, fileHandle);
   fread(externalElf64Hdr.e_type, sizeof(externalElf64Hdr) - EI_NIDENT, 1,
         fileHandle);
-  strcpy(infoElf64Hdr.i_ident, externalElf64Hdr.e_ident);
+
   strcpy(elfHdr.e_ident, externalElf64Hdr.e_ident);
+
   elfHdr.e_type =
       byte_get_little_endian(externalElf64Hdr.e_type, sizeof(elfHdr.e_type));
   elfHdr.e_machine = byte_get_little_endian(externalElf64Hdr.e_machine,
@@ -230,9 +257,10 @@ int processElfHeader(const char *inputFileName) {
   elfHdr.e_shstrndx = byte_get_little_endian(externalElf64Hdr.e_shstrndx,
                                              sizeof(elfHdr.e_shstrndx));
   elfHdrIdent(&elfHdr, &infoElf64Hdr);
+
   elfHdrType(&elfHdr, &infoElf64Hdr);
   elfHdrMachine(&elfHdr, &infoElf64Hdr);
-  elfHdrVersion(&elfHdr, &infoElf64Hdr);
+  elfHdrObjectVersion(&elfHdr, &infoElf64Hdr);
   elfHdrEntry(&elfHdr, &infoElf64Hdr);
   elfHdrPhoff(&elfHdr, &infoElf64Hdr);
   elfHdrShoff(&elfHdr, &infoElf64Hdr);
@@ -243,7 +271,6 @@ int processElfHeader(const char *inputFileName) {
   elfHdrShentsize(&elfHdr, &infoElf64Hdr);
   elfHdrShnum(&elfHdr, &infoElf64Hdr);
   elfHdrShstrndx(&elfHdr, &infoElf64Hdr);
-  elfHdrFlags(&elfHdr, &infoElf64Hdr);
 
   printfElf64Header(&infoElf64Hdr);
 
