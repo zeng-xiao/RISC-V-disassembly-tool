@@ -4,4 +4,10 @@ build
 # vscode
 .vscode
 
+# tmp files
+*.a
 *.o
+*.d
+
+# elf
+readelf-riscv

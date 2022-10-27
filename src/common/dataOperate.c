@@ -1,5 +1,3 @@
-#include "elfHeader.h"
-
 #include <libintl.h>
 #include <stdbool.h>
 #include <stdio.h>

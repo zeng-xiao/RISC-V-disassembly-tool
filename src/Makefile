@@ -20,7 +20,7 @@ SUBDIRS:=$(dirs)
 #这里的目的是将主模块的路径放在最后，以便其余子模块先编译
 #基本原理是先给出主模块的目录，在检索到下一层级包含有主模块目录时，
 #将主模块目录先从其中过滤出来，然后在拼接到末尾
-SOURCEDIR=main
+SOURCEDIR=readelf
 TMPDIR:=$(filter $(SOURCEDIR),$(dirs))
 
 ifeq ($(TMPDIR),$(SOURCEDIR))
@@ -36,11 +36,7 @@ DEPS=$(patsubst %.c,%.d,$(SRCS))
 #这里的TARGET，LIB变量分别由主模块和子模块的makefile给出，若无则不进行规则
 .PHONY=all
 all:$(TARGET) $(LIB) subdirs
-$(LIB):$(OBJS)
-	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS)"
-	$(AR) $@ $^
-	cp $@ $(LIBPATH)
-	cp $(INCLUDE) $(INCLUDEPATH)
+
 
 #该规则是这个makefile的重点，代表层级调用，循环调用每个子目录下的makefile
 subdirs:$(SUBDIRS)
@@ -53,7 +49,7 @@ $(TARGET):$(OBJS)
 	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS)"
 	@echo "Compiling $(TARGET)"
 	$(CC) $^ -o $@ $(LDFLAGS) -L $(LIBPATH)
-	cp $(TARGET) $(EXEPATH)
+	cp $(TARGET) $(BINPATH)
 
 %.o:%.c
 	@echo "Compiling $<"

@@ -1,9 +1,9 @@
 TOPDIR=$(shell pwd)
 
-BINPATH=$(TOPDIR)/bin
-BUILDPATH=$(TOPDIR)/build
-LIBPATH=$(TOPDIR)/lib
-export BINPATH BUILDPATH
+#BINPATH=$(TOPDIR)/bin
+#BUILDPATH=$(TOPDIR)/build
+#LIBPATH=$(TOPDIR)/lib
+#export BINPATH BUILDPATH
 
 exclude_dirs= bin build include
 export exclude_dirs
@@ -18,11 +18,8 @@ $(BUILDPATH):
 $(BINPATH):
 	mkdir -p $(BINPATH)
 
-$(LIBPATH):
-	mkdir -p $(LIBPATH)
-
-readelf : $(BINPATH)/readelf-riscv
-	$(BINPATH)/readelf-riscv /home/user/code/riscv/dwarf_relocations/add.c.S.o
+readelf : $(TOPDIR)/src/readelf/readelf-riscv
+	$(TOPDIR)/src/readelf/readelf-riscv /home/user/code/riscv/dwarf_relocations/add.c.S.o
 
 .PHONY=clean
 clean:

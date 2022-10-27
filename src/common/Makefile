@@ -1,7 +1,5 @@
 TOPDIR=./../..
 
-TARGET=readelf-riscv
-
 LIB=libdataOprate.a
 
 INCLUDEPATH=./include
