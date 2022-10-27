@@ -1,6 +1,3 @@
-#include "elfHeader.h"
-
-#include <libintl.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +5,8 @@
 
 #include "dataOperate.h"
 #include "elf.h"
+
+#include "elfHeader.h"
 
 static int elfHdrIdent(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   if (elfHdr->e_ident[EI_MAG0] != ELFMAG0 ||

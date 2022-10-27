@@ -1,10 +1,7 @@
 #ifndef ELF_HEADER_H
 #define ELF_HEADER_H
 
-#include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 int processElfHeader(const char *inputFileName);
 
