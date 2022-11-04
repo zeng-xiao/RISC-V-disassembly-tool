@@ -110,6 +110,7 @@ static void elfHdrPhoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
 
 static void elfHdrShoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_shoff = elfHdr->e_shoff;
+  sectionHeadersAddress = elfHdr->e_shoff;
 }
 
 static void elfHdrFlag(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
@@ -160,10 +161,12 @@ static void elfHdrPhnum(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
 
 static void elfHdrShentsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_shentsize = elfHdr->e_shentsize;
+  sectionSize = elfHdr->e_shentsize;
 }
 
 static void elfHdrShnum(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_shnum = elfHdr->e_shnum;
+  sectionNumber = elfHdr->e_shnum;
 }
 
 static void elfHdrShstrndx(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
@@ -227,6 +230,8 @@ int processElfHeader(const char *inputFileName) {
   fread(externalElf64Hdr.e_ident, EI_NIDENT, 1, fileHandle);
   fread(externalElf64Hdr.e_type, sizeof(externalElf64Hdr) - EI_NIDENT, 1,
         fileHandle);
+
+  closeFile(fileHandle);
 
   strcpy(elfHdr.e_ident, externalElf64Hdr.e_ident);
 

@@ -74,7 +74,24 @@ typedef struct {
   uint16_t i_shstrndx;       /* Section header string table index */
 } Elf64_Info_Ehdr;
 
-/* File uses the 32E base integer instruction.  */
-//#define EF_RISCV_RVE 0x0008
+typedef unsigned long bfd_vma;
+typedef unsigned long bfd_size_type;
+
+typedef struct elf_internal_ehdr {
+  unsigned char e_ident[EI_NIDENT]; /* ELF "magic number" */
+  bfd_vma e_entry;                  /* Entry point virtual address */
+  bfd_size_type e_phoff;            /* Program header table file offset */
+  bfd_size_type e_shoff;            /* Section header table file offset */
+  unsigned long e_version;          /* Identifies object file version */
+  unsigned long e_flags;            /* Processor-specific flags */
+  unsigned short e_type;            /* Identifies object file type */
+  unsigned short e_machine;         /* Specifies required architecture */
+  unsigned int e_ehsize;            /* ELF header size in bytes */
+  unsigned int e_phentsize;         /* Program header table entry size */
+  unsigned int e_phnum;             /* Program header table entry count */
+  unsigned int e_shentsize;         /* Section header table entry size */
+  unsigned int e_shnum;             /* Section header table entry count */
+  unsigned int e_shstrndx;          /* Section header string table index */
+} Elf_Internal_Ehdr;
 
 #endif

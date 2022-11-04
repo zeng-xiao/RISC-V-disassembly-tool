@@ -106,3 +106,12 @@ void byte_put_little_endian(unsigned char *field, uint64_t value, int size) {
     abort();
   }
 }
+
+void closeFile(FILE *fileHandle) {
+  if (fileHandle)
+    fclose(fileHandle);
+  else {
+    printf("fileHandle is NULL\n");
+    abort();
+  }
+}

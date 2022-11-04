@@ -37,9 +37,6 @@ typedef uint16_t Elf64_Section;
 typedef Elf32_Half Elf32_Versym;
 typedef Elf64_Half Elf64_Versym;
 
-typedef unsigned long bfd_vma;
-typedef unsigned long bfd_size_type;
-
 /* Fields in e_ident[].  */
 
 #define EI_MAG0 0    /* File identification byte 0 index */
@@ -200,22 +197,9 @@ typedef struct {
   Elf64_Xword sh_entsize;   /* Entry size if section holds table */
 } Elf64_Shdr;
 
-typedef struct elf_internal_ehdr {
-  unsigned char e_ident[EI_NIDENT]; /* ELF "magic number" */
-  bfd_vma e_entry;                  /* Entry point virtual address */
-  bfd_size_type e_phoff;            /* Program header table file offset */
-  bfd_size_type e_shoff;            /* Section header table file offset */
-  unsigned long e_version;          /* Identifies object file version */
-  unsigned long e_flags;            /* Processor-specific flags */
-  unsigned short e_type;            /* Identifies object file type */
-  unsigned short e_machine;         /* Specifies required architecture */
-  unsigned int e_ehsize;            /* ELF header size in bytes */
-  unsigned int e_phentsize;         /* Program header table entry size */
-  unsigned int e_phnum;             /* Program header table entry count */
-  unsigned int e_shentsize;         /* Section header table entry size */
-  unsigned int e_shnum;             /* Section header table entry count */
-  unsigned int e_shstrndx;          /* Section header string table index */
-} Elf_Internal_Ehdr;
+Elf64_Off sectionHeadersAddress; /* Section header table file offset */
+Elf64_Half sectionNumber;        /* Section header table entry count */
+Elf64_Half sectionSize;          /* Section header table entry size */
 
 #define ENOENT 2 /* No such file or directory */
 
