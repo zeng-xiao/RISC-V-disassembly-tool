@@ -197,10 +197,6 @@ typedef struct {
   Elf64_Xword sh_entsize;   /* Entry size if section holds table */
 } Elf64_Shdr;
 
-Elf64_Off sectionHeadersAddress; /* Section header table file offset */
-Elf64_Half sectionNumber;        /* Section header table entry count */
-Elf64_Half sectionSize;          /* Section header table entry size */
-
 #define ENOENT 2 /* No such file or directory */
 
 #endif
