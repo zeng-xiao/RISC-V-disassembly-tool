@@ -27,7 +27,7 @@ typedef struct {
   unsigned char e_shentsize[2]; /* Section header table entry size */
   unsigned char e_shnum[2];     /* Section header table entry count */
   unsigned char e_shstrndx[2];  /* Section header string table index */
-} Elf32_External_Ehdr;
+} Elf32_Auxiliary_Ehdr;
 
 /* ELF Header (64-bit implementations) */
 typedef struct {
@@ -45,7 +45,7 @@ typedef struct {
   unsigned char e_shentsize[2]; /* Section header table entry size */
   unsigned char e_shnum[2];     /* Section header table entry count */
   unsigned char e_shstrndx[2];  /* Section header string table index */
-} Elf64_External_Ehdr;
+} Elf64_Auxiliary_Ehdr;
 
 #define EI_NIDENT (16)
 

@@ -222,44 +222,44 @@ static void printfElf64Header(Elf64_Info_Ehdr *elfInfo) {
 
 int processElfHeader(const char *inputFileName) {
   Elf64_Ehdr elfHdr;
-  Elf64_External_Ehdr externalElf64Hdr;
+  Elf64_Auxiliary_Ehdr auxiliaryElf64Hdr;
   Elf64_Info_Ehdr infoElf64Hdr;
 
   FILE *fileHandle = fopen(inputFileName, "rb");
 
-  fread(externalElf64Hdr.e_ident, EI_NIDENT, 1, fileHandle);
-  fread(externalElf64Hdr.e_type, sizeof(externalElf64Hdr) - EI_NIDENT, 1,
+  fread(auxiliaryElf64Hdr.e_ident, EI_NIDENT, 1, fileHandle);
+  fread(auxiliaryElf64Hdr.e_type, sizeof(auxiliaryElf64Hdr) - EI_NIDENT, 1,
         fileHandle);
 
   closeFile(fileHandle);
 
-  strcpy(elfHdr.e_ident, externalElf64Hdr.e_ident);
+  strcpy(elfHdr.e_ident, auxiliaryElf64Hdr.e_ident);
 
   elfHdr.e_type =
-      byte_get_little_endian(externalElf64Hdr.e_type, sizeof(elfHdr.e_type));
-  elfHdr.e_machine = byte_get_little_endian(externalElf64Hdr.e_machine,
+      byte_get_little_endian(auxiliaryElf64Hdr.e_type, sizeof(elfHdr.e_type));
+  elfHdr.e_machine = byte_get_little_endian(auxiliaryElf64Hdr.e_machine,
                                             sizeof(elfHdr.e_machine));
-  elfHdr.e_version = byte_get_little_endian(externalElf64Hdr.e_version,
+  elfHdr.e_version = byte_get_little_endian(auxiliaryElf64Hdr.e_version,
                                             sizeof(elfHdr.e_version));
   elfHdr.e_entry =
-      byte_get_little_endian(externalElf64Hdr.e_entry, sizeof(elfHdr.e_entry));
+      byte_get_little_endian(auxiliaryElf64Hdr.e_entry, sizeof(elfHdr.e_entry));
   elfHdr.e_phoff =
-      byte_get_little_endian(externalElf64Hdr.e_phoff, sizeof(elfHdr.e_phoff));
+      byte_get_little_endian(auxiliaryElf64Hdr.e_phoff, sizeof(elfHdr.e_phoff));
   elfHdr.e_shoff =
-      byte_get_little_endian(externalElf64Hdr.e_shoff, sizeof(elfHdr.e_shoff));
+      byte_get_little_endian(auxiliaryElf64Hdr.e_shoff, sizeof(elfHdr.e_shoff));
   elfHdr.e_flags =
-      byte_get_little_endian(externalElf64Hdr.e_flags, sizeof(elfHdr.e_flags));
-  elfHdr.e_ehsize = byte_get_little_endian(externalElf64Hdr.e_ehsize,
+      byte_get_little_endian(auxiliaryElf64Hdr.e_flags, sizeof(elfHdr.e_flags));
+  elfHdr.e_ehsize = byte_get_little_endian(auxiliaryElf64Hdr.e_ehsize,
                                            sizeof(elfHdr.e_ehsize));
-  elfHdr.e_phentsize = byte_get_little_endian(externalElf64Hdr.e_phentsize,
+  elfHdr.e_phentsize = byte_get_little_endian(auxiliaryElf64Hdr.e_phentsize,
                                               sizeof(elfHdr.e_phentsize));
   elfHdr.e_phnum =
-      byte_get_little_endian(externalElf64Hdr.e_phnum, sizeof(elfHdr.e_phnum));
-  elfHdr.e_shentsize = byte_get_little_endian(externalElf64Hdr.e_shentsize,
+      byte_get_little_endian(auxiliaryElf64Hdr.e_phnum, sizeof(elfHdr.e_phnum));
+  elfHdr.e_shentsize = byte_get_little_endian(auxiliaryElf64Hdr.e_shentsize,
                                               sizeof(elfHdr.e_shentsize));
   elfHdr.e_shnum =
-      byte_get_little_endian(externalElf64Hdr.e_shnum, sizeof(elfHdr.e_shnum));
-  elfHdr.e_shstrndx = byte_get_little_endian(externalElf64Hdr.e_shstrndx,
+      byte_get_little_endian(auxiliaryElf64Hdr.e_shnum, sizeof(elfHdr.e_shnum));
+  elfHdr.e_shstrndx = byte_get_little_endian(auxiliaryElf64Hdr.e_shstrndx,
                                              sizeof(elfHdr.e_shstrndx));
   elfHdrIdent(&elfHdr, &infoElf64Hdr);
 

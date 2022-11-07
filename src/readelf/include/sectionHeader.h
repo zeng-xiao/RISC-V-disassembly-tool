@@ -17,5 +17,18 @@ typedef struct {
   Elf64_Xword i_sh_entsize;
 } Elf64_Info_Shdr;
 
-const char *sHdrStrTab[10000];
+/* ELF Header (64-bit implementations) */
+typedef struct {
+  unsigned char a_sh_name[4];
+  unsigned char a_sh_type[4];
+  unsigned char a_sh_flags[8];
+  unsigned char a_sh_addr[8];
+  unsigned char a_sh_offset[8];
+  unsigned char a_sh_size[8];
+  unsigned char a_sh_link[4];
+  unsigned char a_sh_info[4];
+  unsigned char a_sh_addralign[8];
+  unsigned char a_sh_entsize[8];
+} Elf64_Auxiliary_Shdr;
+
 #endif
