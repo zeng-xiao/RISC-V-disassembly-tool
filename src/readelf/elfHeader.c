@@ -8,37 +8,35 @@
 
 #include "elfHeader.h"
 
-Elf64_Off sectionHeadersAddress; /* Section header table file offset */
-Elf64_Half sectionNumber;        /* Section header table entry count */
-Elf64_Half sectionSize;          /* Section header table entry size */
-Elf64_Half sectionShstrtabIndex; /* Section header table entry size */
+Elf64_Off shdrAddress;      /* Section header table file offset */
+Elf64_Half shdrNumber;      /* Section header table entry count */
+Elf64_Half shdrSize;        /* Section header table entry size */
+Elf64_Half shdrStrtabIndex; /* Section header table entry size */
 
-static int elfHdrIdent(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  strcpy(elfInfo->i_ident, elfHdr->e_ident);
+static int ehdrIdent(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  strcpy(elfInfo->i_ident, ehdr->e_ident);
 
-  if (elfHdr->e_ident[EI_MAG0] != ELFMAG0 ||
-      elfHdr->e_ident[EI_MAG1] != ELFMAG1 ||
-      elfHdr->e_ident[EI_MAG2] != ELFMAG2 ||
-      elfHdr->e_ident[EI_MAG3] != ELFMAG3)
+  if (ehdr->e_ident[EI_MAG0] != ELFMAG0 || ehdr->e_ident[EI_MAG1] != ELFMAG1 ||
+      ehdr->e_ident[EI_MAG2] != ELFMAG2 || ehdr->e_ident[EI_MAG3] != ELFMAG3)
     return false;
 
-  if (elfHdr->e_ident[EI_CLASS] == ELFCLASS32)
+  if (ehdr->e_ident[EI_CLASS] == ELFCLASS32)
     elfInfo->i_class = "ELF32";
-  else if (elfHdr->e_ident[EI_CLASS] == ELFCLASS64)
+  else if (ehdr->e_ident[EI_CLASS] == ELFCLASS64)
     elfInfo->i_class = "ELF64";
   else
     return false;
 
-  if (elfHdr->e_ident[EI_DATA] == ELFDATA2LSB)
+  if (ehdr->e_ident[EI_DATA] == ELFDATA2LSB)
     elfInfo->i_dataEncodingForm = "2's complement, little endian";
-  else if (elfHdr->e_ident[EI_DATA] == ELFDATA2MSB)
+  else if (ehdr->e_ident[EI_DATA] == ELFDATA2MSB)
     elfInfo->i_dataEncodingForm = "2's complement, big endian";
   else
     return false;
 
-  elfInfo->i_fileVersion = elfHdr->e_ident[EI_VERSION];
+  elfInfo->i_fileVersion = ehdr->e_ident[EI_VERSION];
 
-  switch (elfHdr->e_ident[EI_OSABI]) {
+  switch (ehdr->e_ident[EI_OSABI]) {
   case ELFOSABI_NONE:
     elfInfo->i_osAbi = "UNIX - System V";
     break;
@@ -58,12 +56,12 @@ static int elfHdrIdent(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
     printf("Unsupported OS ABI\n");
     abort();
   }
-  elfInfo->i_abiVersion = elfHdr->e_ident[EI_ABIVERSION];
+  elfInfo->i_abiVersion = ehdr->e_ident[EI_ABIVERSION];
   return 0;
 }
 
-static void elfHdrType(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  switch (elfHdr->e_type) {
+static void ehdrType(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  switch (ehdr->e_type) {
   case ET_NONE:
     elfInfo->i_type = "NONE (None)";
     break;
@@ -86,8 +84,8 @@ static void elfHdrType(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   }
 }
 
-static void elfHdrMachine(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  switch (elfHdr->e_machine) {
+static void ehdrMachine(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  switch (ehdr->e_machine) {
   case EM_RISCV:
     elfInfo->i_machine = "RISC-V";
     break;
@@ -98,37 +96,37 @@ static void elfHdrMachine(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   }
 }
 
-static int elfHdrObjectVersion(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  if (elfHdr->e_version != elfHdr->e_ident[EI_VERSION])
+static int ehdrObjectVersion(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  if (ehdr->e_version != ehdr->e_ident[EI_VERSION])
     return false;
-  elfInfo->i_objectVersion = elfHdr->e_version;
+  elfInfo->i_objectVersion = ehdr->e_version;
   return 0;
 }
 
-static void elfHdrEntry(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_entry = elfHdr->e_entry;
+static void ehdrEntry(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_entry = ehdr->e_entry;
 }
 
-static void elfHdrPhoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_phoff = elfHdr->e_phoff;
+static void ehdrPhoff(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_phoff = ehdr->e_phoff;
 }
 
-static void elfHdrShoff(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_shoff = elfHdr->e_shoff;
-  sectionHeadersAddress = elfHdr->e_shoff;
+static void ehdrShoff(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_shoff = ehdr->e_shoff;
+  shdrAddress = ehdr->e_shoff;
 }
 
-static void elfHdrFlag(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_flags = elfHdr->e_flags;
+static void ehdrFlag(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_flags = ehdr->e_flags;
 
-  if (elfHdr->e_machine == EM_RISCV) {
-    if (elfHdr->e_flags & EF_RISCV_RVC)
+  if (ehdr->e_machine == EM_RISCV) {
+    if (ehdr->e_flags & EF_RISCV_RVC)
       strcat(elfInfo->i_flagStatement, ", RVC");
 
-    if (elfHdr->e_flags & EF_RISCV_RVE)
+    if (ehdr->e_flags & EF_RISCV_RVE)
       strcat(elfInfo->i_flagStatement, ", RVE");
 
-    switch (elfHdr->e_flags & EF_RISCV_FLOAT_ABI) {
+    switch (ehdr->e_flags & EF_RISCV_FLOAT_ABI) {
     case EF_RISCV_FLOAT_ABI_SOFT:
       strcat(elfInfo->i_flagStatement, ", soft-float ABI");
       break;
@@ -152,31 +150,31 @@ static void elfHdrFlag(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   }
 }
 
-static void elfHdrEhsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_ehsize = elfHdr->e_ehsize;
+static void ehdrEhsize(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_ehsize = ehdr->e_ehsize;
 }
 
-static void elfHdrPhentsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_phentsize = elfHdr->e_phentsize;
+static void ehdrPhentsize(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_phentsize = ehdr->e_phentsize;
 }
 
-static void elfHdrPhnum(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_phnum = elfHdr->e_phnum;
+static void ehdrPhnum(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_phnum = ehdr->e_phnum;
 }
 
-static void elfHdrShentsize(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_shentsize = elfHdr->e_shentsize;
-  sectionSize = elfHdr->e_shentsize;
+static void ehdrShentsize(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_shentsize = ehdr->e_shentsize;
+  shdrSize = ehdr->e_shentsize;
 }
 
-static void elfHdrShnum(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_shnum = elfHdr->e_shnum;
-  sectionNumber = elfHdr->e_shnum;
+static void ehdrShnum(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_shnum = ehdr->e_shnum;
+  shdrNumber = ehdr->e_shnum;
 }
 
-static void elfHdrShstrndx(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
-  elfInfo->i_shstrndx = elfHdr->e_shstrndx;
-  sectionShstrtabIndex = elfHdr->e_shstrndx;
+static void ehdrShstrndx(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  elfInfo->i_shstrndx = ehdr->e_shstrndx;
+  shdrStrtabIndex = ehdr->e_shstrndx;
 }
 
 static void printfElf64Header(Elf64_Info_Ehdr *elfInfo) {
@@ -227,63 +225,56 @@ static void printfElf64Header(Elf64_Info_Ehdr *elfInfo) {
 }
 
 int processElfHeader(const char *inputFileName) {
-  Elf64_Ehdr elfHdr;
-  Elf64_Auxiliary_Ehdr auxiliaryElf64Hdr;
-  Elf64_Info_Ehdr infoElf64Hdr;
+  Elf64_Ehdr ehdr;
+  Elf64_Info_Ehdr i_ehdr;
+  Elf64_Auxiliary_Ehdr a_ehdr;
 
   FILE *fileHandle = fopen(inputFileName, "rb");
 
-  fread(auxiliaryElf64Hdr.a_e_ident, EI_NIDENT, 1, fileHandle);
-  fread(auxiliaryElf64Hdr.a_e_type, sizeof(auxiliaryElf64Hdr) - EI_NIDENT, 1,
-        fileHandle);
+  fread(a_ehdr.a_e_ident, EI_NIDENT, 1, fileHandle);
+  fread(a_ehdr.a_e_type, sizeof(a_ehdr) - EI_NIDENT, 1, fileHandle);
 
   closeFile(fileHandle);
 
-  strcpy(elfHdr.e_ident, auxiliaryElf64Hdr.a_e_ident);
+  strcpy(ehdr.e_ident, a_ehdr.a_e_ident);
 
-  elfHdr.e_type =
-      byte_get_little_endian(auxiliaryElf64Hdr.a_e_type, sizeof(elfHdr.e_type));
-  elfHdr.e_machine = byte_get_little_endian(auxiliaryElf64Hdr.a_e_machine,
-                                            sizeof(elfHdr.e_machine));
-  elfHdr.e_version = byte_get_little_endian(auxiliaryElf64Hdr.a_e_version,
-                                            sizeof(elfHdr.e_version));
-  elfHdr.e_entry = byte_get_little_endian(auxiliaryElf64Hdr.a_e_entry,
-                                          sizeof(elfHdr.e_entry));
-  elfHdr.e_phoff = byte_get_little_endian(auxiliaryElf64Hdr.a_e_phoff,
-                                          sizeof(elfHdr.e_phoff));
-  elfHdr.e_shoff = byte_get_little_endian(auxiliaryElf64Hdr.a_e_shoff,
-                                          sizeof(elfHdr.e_shoff));
-  elfHdr.e_flags = byte_get_little_endian(auxiliaryElf64Hdr.a_e_flags,
-                                          sizeof(elfHdr.e_flags));
-  elfHdr.e_ehsize = byte_get_little_endian(auxiliaryElf64Hdr.a_e_ehsize,
-                                           sizeof(elfHdr.e_ehsize));
-  elfHdr.e_phentsize = byte_get_little_endian(auxiliaryElf64Hdr.a_e_phentsize,
-                                              sizeof(elfHdr.e_phentsize));
-  elfHdr.e_phnum = byte_get_little_endian(auxiliaryElf64Hdr.a_e_phnum,
-                                          sizeof(elfHdr.e_phnum));
-  elfHdr.e_shentsize = byte_get_little_endian(auxiliaryElf64Hdr.a_e_shentsize,
-                                              sizeof(elfHdr.e_shentsize));
-  elfHdr.e_shnum = byte_get_little_endian(auxiliaryElf64Hdr.a_e_shnum,
-                                          sizeof(elfHdr.e_shnum));
-  elfHdr.e_shstrndx = byte_get_little_endian(auxiliaryElf64Hdr.a_e_shstrndx,
-                                             sizeof(elfHdr.e_shstrndx));
-  elfHdrIdent(&elfHdr, &infoElf64Hdr);
+  ehdr.e_type = byte_get_little_endian(a_ehdr.a_e_type, sizeof(ehdr.e_type));
+  ehdr.e_machine =
+      byte_get_little_endian(a_ehdr.a_e_machine, sizeof(ehdr.e_machine));
+  ehdr.e_version =
+      byte_get_little_endian(a_ehdr.a_e_version, sizeof(ehdr.e_version));
+  ehdr.e_entry = byte_get_little_endian(a_ehdr.a_e_entry, sizeof(ehdr.e_entry));
+  ehdr.e_phoff = byte_get_little_endian(a_ehdr.a_e_phoff, sizeof(ehdr.e_phoff));
+  ehdr.e_shoff = byte_get_little_endian(a_ehdr.a_e_shoff, sizeof(ehdr.e_shoff));
+  ehdr.e_flags = byte_get_little_endian(a_ehdr.a_e_flags, sizeof(ehdr.e_flags));
+  ehdr.e_ehsize =
+      byte_get_little_endian(a_ehdr.a_e_ehsize, sizeof(ehdr.e_ehsize));
+  ehdr.e_phentsize =
+      byte_get_little_endian(a_ehdr.a_e_phentsize, sizeof(ehdr.e_phentsize));
+  ehdr.e_phnum = byte_get_little_endian(a_ehdr.a_e_phnum, sizeof(ehdr.e_phnum));
+  ehdr.e_shentsize =
+      byte_get_little_endian(a_ehdr.a_e_shentsize, sizeof(ehdr.e_shentsize));
+  ehdr.e_shnum = byte_get_little_endian(a_ehdr.a_e_shnum, sizeof(ehdr.e_shnum));
+  ehdr.e_shstrndx =
+      byte_get_little_endian(a_ehdr.a_e_shstrndx, sizeof(ehdr.e_shstrndx));
 
-  elfHdrType(&elfHdr, &infoElf64Hdr);
-  elfHdrMachine(&elfHdr, &infoElf64Hdr);
-  elfHdrObjectVersion(&elfHdr, &infoElf64Hdr);
-  elfHdrEntry(&elfHdr, &infoElf64Hdr);
-  elfHdrPhoff(&elfHdr, &infoElf64Hdr);
-  elfHdrShoff(&elfHdr, &infoElf64Hdr);
-  elfHdrFlag(&elfHdr, &infoElf64Hdr);
-  elfHdrEhsize(&elfHdr, &infoElf64Hdr);
-  elfHdrPhentsize(&elfHdr, &infoElf64Hdr);
-  elfHdrPhnum(&elfHdr, &infoElf64Hdr);
-  elfHdrShentsize(&elfHdr, &infoElf64Hdr);
-  elfHdrShnum(&elfHdr, &infoElf64Hdr);
-  elfHdrShstrndx(&elfHdr, &infoElf64Hdr);
+  ehdrIdent(&ehdr, &i_ehdr);
 
-  printfElf64Header(&infoElf64Hdr);
+  ehdrType(&ehdr, &i_ehdr);
+  ehdrMachine(&ehdr, &i_ehdr);
+  ehdrObjectVersion(&ehdr, &i_ehdr);
+  ehdrEntry(&ehdr, &i_ehdr);
+  ehdrPhoff(&ehdr, &i_ehdr);
+  ehdrShoff(&ehdr, &i_ehdr);
+  ehdrFlag(&ehdr, &i_ehdr);
+  ehdrEhsize(&ehdr, &i_ehdr);
+  ehdrPhentsize(&ehdr, &i_ehdr);
+  ehdrPhnum(&ehdr, &i_ehdr);
+  ehdrShentsize(&ehdr, &i_ehdr);
+  ehdrShnum(&ehdr, &i_ehdr);
+  ehdrShstrndx(&ehdr, &i_ehdr);
+
+  printfElf64Header(&i_ehdr);
 
   return 0;
 }

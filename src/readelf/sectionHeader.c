@@ -7,10 +7,10 @@
 #include "dataOperate.h"
 #include "sectionHeader.h"
 
-extern Elf64_Off sectionHeadersAddress;
-extern Elf64_Half sectionNumber;
-extern Elf64_Half sectionSize;
-extern Elf64_Half sectionShstrtabIndex;
+extern Elf64_Off shdrAddress;
+extern Elf64_Half shdrNumber;
+extern Elf64_Half shdrSize;
+extern Elf64_Half shdrStrtabIndex;
 
 static void printfElf64Header(Elf64_Info_Shdr *i_shdr) {
   fprintf(stderr, "\n\n");
@@ -22,7 +22,7 @@ static void printfElf64Header(Elf64_Info_Shdr *i_shdr) {
           "EntrySize Flags "
           "LinkToSection Info "
           "Alignment\n");
-  for (int index = 0; index < sectionNumber; index++) {
+  for (int index = 0; index < shdrNumber; index++) {
     fprintf(
         stderr,
         "  [%02d]    %-19s      %-16s  %016lx "
@@ -48,7 +48,7 @@ static void sh_name_str(int index, Elf64_Shdr *shdr, Elf64_Info_Shdr *i_shdr,
   char *strBuffer = (char *)malloc(1024);
   uint64_t strOffset;
 
-  strOffset = shdr[sectionShstrtabIndex].sh_offset + shdr[index].sh_name;
+  strOffset = shdr[shdrStrtabIndex].sh_offset + shdr[index].sh_name;
   if (!fseek(fileHandle, strOffset, SEEK_SET))
     fscanf(fileHandle, "%s", strBuffer);
   i_shdr[index].i_sh_name = strBuffer;
@@ -227,13 +227,13 @@ static void sh_entsize(int index, Elf64_Shdr *shdr,
 int processSectionHeader(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");
 
-  Elf64_Shdr shdr[sectionNumber];
-  Elf64_Info_Shdr i_shdr[sectionNumber];
-  Elf64_Auxiliary_Shdr a_shdr[sectionNumber];
+  Elf64_Shdr shdr[shdrNumber];
+  Elf64_Info_Shdr i_shdr[shdrNumber];
+  Elf64_Auxiliary_Shdr a_shdr[shdrNumber];
 
-  if (!fseek(fileHandle, sectionHeadersAddress, SEEK_SET))
-    for (int index = 0; index < sectionNumber; index++) {
-      fread(&a_shdr[index], sectionSize, 1, fileHandle);
+  if (!fseek(fileHandle, shdrAddress, SEEK_SET))
+    for (int index = 0; index < shdrNumber; index++) {
+      fread(&a_shdr[index], shdrSize, 1, fileHandle);
 
       sh_name(index, shdr, a_shdr, i_shdr);
       sh_type(index, shdr, a_shdr, i_shdr);
@@ -247,7 +247,7 @@ int processSectionHeader(const char *inputFileName) {
       sh_entsize(index, shdr, a_shdr, i_shdr);
     }
 
-  for (int index = 0; index < sectionNumber; index++)
+  for (int index = 0; index < shdrNumber; index++)
     sh_name_str(index, shdr, i_shdr, fileHandle);
 
   closeFile(fileHandle);
