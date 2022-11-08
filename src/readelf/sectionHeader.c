@@ -25,6 +25,9 @@ Elf64_Xword shdrRiscv_attributesSize = 0;
 Elf64_Off shdrGCCcommandlineOff = 0;
 Elf64_Xword shdrGCCcommandlineSize = 0;
 
+Elf64_Off shdrTextOff = 0;
+Elf64_Xword shdrTextSize = 0;
+
 static void printfElf64Header(Elf64_Info_Shdr *i_shdr) {
   fprintf(stderr, "\n\n");
 
@@ -86,6 +89,11 @@ static void sh_name_str(int shdrIndex, Elf64_Shdr *shdr,
   if (!strcmp(".GCC.command.line", strBuffer)) {
     shdrGCCcommandlineOff = shdr[shdrIndex].sh_offset;
     shdrGCCcommandlineSize = shdr[shdrIndex].sh_size;
+  }
+
+  if (!strcmp(".text", strBuffer)) {
+    shdrTextOff = shdr[shdrIndex].sh_offset;
+    shdrTextSize = shdr[shdrIndex].sh_size;
   }
 }
 
