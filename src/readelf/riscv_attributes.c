@@ -13,9 +13,10 @@ int dumpRiscv_attributes(const char *inputFileName) {
 
   fprintf(stderr, "\n\n");
   fprintf(stderr, "Contents of section .riscv.attributes:\n");
+
   if (!shdrRiscv_attributesOff) {
-    printf("No .debug_str section\n");
-    abort();
+    fprintf(stderr, "\n");
+    return 0;
   }
 
   char *strBuffer = (char *)malloc(shdrRiscv_attributesSize);
@@ -32,5 +33,6 @@ int dumpRiscv_attributes(const char *inputFileName) {
   closeFile(fileHandle);
 
   fprintf(stderr, "\n\n");
+
   return 0;
 }

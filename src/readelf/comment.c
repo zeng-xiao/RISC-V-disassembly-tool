@@ -13,9 +13,10 @@ int dumpComment(const char *inputFileName) {
 
   fprintf(stderr, "\n\n");
   fprintf(stderr, "Contents of section .comment:\n");
+
   if (!shdrCommentOff) {
-    printf("No .comment section\n");
-    abort();
+    fprintf(stderr, "\n");
+    return 0;
   }
 
   char *strBuffer = (char *)malloc(shdrCommentSize);
@@ -32,5 +33,6 @@ int dumpComment(const char *inputFileName) {
   closeFile(fileHandle);
 
   fprintf(stderr, "\n\n");
+
   return 0;
 }

@@ -13,9 +13,10 @@ int dumpDebug_str(const char *inputFileName) {
 
   fprintf(stderr, "\n\n");
   fprintf(stderr, "Contents of section .debug_str:\n");
+
   if (!shdrDebug_strOff) {
-    printf("No .debug_str section\n");
-    abort();
+    fprintf(stderr, "\n");
+    return 0;
   }
 
   char *strBuffer = (char *)malloc(shdrDebug_strSize);
@@ -32,5 +33,6 @@ int dumpDebug_str(const char *inputFileName) {
   closeFile(fileHandle);
 
   fprintf(stderr, "\n\n");
+
   return 0;
 }
