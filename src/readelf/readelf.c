@@ -7,6 +7,8 @@
 #include "debug_str.h"
 #include "riscv_attributes.h"
 
+#include "debug_frame.h"
+
 #include "text.h"
 
 int main(int argc, char **argv) {
@@ -20,6 +22,8 @@ int main(int argc, char **argv) {
   dumpComment(inputFileName);
   dumpRiscv_attributes(inputFileName);
   dumpGCCcommandline(inputFileName);
+
+  analysisDebug_frame(inputFileName);
 
   disassembleText(inputFileName);
 
