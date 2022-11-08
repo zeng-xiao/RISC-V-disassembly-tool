@@ -21,8 +21,11 @@ static void printfElf64Header(Elf64_Info_Shdr *elfInfo) {
   fprintf(stderr, "\n\n");
 
   fprintf(stderr, "Section Headers Info:\n");
-  fprintf(stderr, "  [Nr]        Name              Type            Address   "
-                  "Offset    Size   EntrySize Flags Link Info Alignment\n");
+  fprintf(
+      stderr,
+      "  [Nr]        Name              SectionType            Address   "
+      "SectionOffsetInFile    SectionSize   EntrySize Flags LinkToSection Info "
+      "Alignment\n");
   for (int i = 0; i < sectionNumber; i++) {
     fprintf(stderr,
             "  [%02d]    %s              %s            %016lx          "
@@ -44,22 +47,20 @@ static void sh_name(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
 
 static void sh_name_str(int index, Elf64_Info_Shdr *sHdrInfo,
                         Elf64_Shdr *elfShdr, const char *inputFileName) {
-  char buff[255];
-  uint64_t tmp;
+  char strBuffer[255];
+  uint64_t strOffset;
   FILE *fileHandle = fopen(inputFileName, "rb");
-  if (!index) {
+
+  if (!index)
     sHdrInfo->i_sh_name = "";
-  } else {
-    tmp = elfShdr[sectionShstrtabIndex].sh_offset + elfShdr[index].sh_name;
-    if (!fseek(fileHandle, tmp, SEEK_SET))
-      fscanf(fileHandle, "%s", buff);
-    sHdrInfo->i_sh_name = buff;
+  else {
+    strOffset =
+        elfShdr[sectionShstrtabIndex].sh_offset + elfShdr[index].sh_name;
+    if (!fseek(fileHandle, strOffset, SEEK_SET))
+      fscanf(fileHandle, "%s", strBuffer);
+    sHdrInfo->i_sh_name = strBuffer;
   }
 
-  //   fprintf(stderr,
-  //           "[index = %d] sHdrInfo->i_sh_name = "
-  //           "%s\nsHdrInfo->i_sh_name=%p\n",
-  //           index, sHdrInfo->i_sh_name, &sHdrInfo->i_sh_name);
   closeFile(fileHandle);
 }
 
@@ -124,8 +125,6 @@ static void sh_type(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
 
   if (!sHdrInfo->i_sh_type)
     sHdrInfo->i_sh_type = "unknown";
-  fprintf(stderr, "[index = %d] sHdrInfo->i_sh_type = %s\n", index,
-          sHdrInfo->i_sh_type);
 }
 
 static void sh_flags(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
@@ -183,7 +182,6 @@ static void sh_flags(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
     p++;
   }
   sHdrInfo->i_sh_flags = buff;
-  fprintf(stderr, "[index = %d] sHdrInfo->i_sh_flags = %s\n", index, buff);
 }
 
 static void sh_addr(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
@@ -191,8 +189,6 @@ static void sh_addr(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
   elfShdr->sh_addr =
       byte_get_little_endian(aShdr->a_sh_addr, sizeof(elfShdr->sh_addr));
   sHdrInfo->i_sh_addr = elfShdr->sh_addr;
-  fprintf(stderr, "[index = %d] sHdrInfo->i_sh_addr = 0x%lx\n", index,
-          elfShdr->sh_addr);
 }
 
 static void sh_offset(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
@@ -200,17 +196,13 @@ static void sh_offset(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
   elfShdr->sh_offset =
       byte_get_little_endian(aShdr->a_sh_offset, sizeof(elfShdr->sh_offset));
   sHdrInfo->i_sh_offset = elfShdr->sh_offset;
-  fprintf(stderr, "[index = %d] sHdrInfo->i_sh_offset = 0x%lx\n", index,
-          elfShdr->sh_offset);
 }
 
 static void sh_size(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
                     Elf64_Auxiliary_Shdr *aShdr) {
   elfShdr->sh_size =
       byte_get_little_endian(aShdr->a_sh_size, sizeof(elfShdr->sh_size));
-  // sHdrInfo->i_sh_size = elfShdr->sh_size;
-  fprintf(stderr, "[index = %d] sHdrInfo->i_sh_size = 0x%lx\n", index,
-          elfShdr->sh_size);
+  sHdrInfo->i_sh_size = elfShdr->sh_size;
 }
 
 static void sh_link(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
@@ -218,8 +210,6 @@ static void sh_link(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
   elfShdr->sh_link =
       byte_get_little_endian(aShdr->a_sh_link, sizeof(elfShdr->sh_link));
   sHdrInfo->i_sh_link = elfShdr->sh_link;
-  fprintf(stderr, "[index = %d] sHdrInfo->i_sh_link = %d\n", index,
-          elfShdr->sh_link);
 }
 
 static void sh_info(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
@@ -227,8 +217,6 @@ static void sh_info(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
   elfShdr->sh_info =
       byte_get_little_endian(aShdr->a_sh_info, sizeof(elfShdr->sh_info));
   sHdrInfo->i_sh_info = elfShdr->sh_info;
-  fprintf(stderr, "[index = %d] sHdrInfo->i_sh_info = %d\n", index,
-          elfShdr->sh_info);
 }
 
 static void sh_addralign(int index, Elf64_Info_Shdr *sHdrInfo,
@@ -236,8 +224,6 @@ static void sh_addralign(int index, Elf64_Info_Shdr *sHdrInfo,
   elfShdr->sh_addralign = byte_get_little_endian(aShdr->a_sh_addralign,
                                                  sizeof(elfShdr->sh_addralign));
   sHdrInfo->i_sh_addralign = elfShdr->sh_addralign;
-  fprintf(stderr, "[index = %d] sHdrInfo->i_sh_addralign = 0x%lx\n", index,
-          elfShdr->sh_addralign);
 }
 
 static void sh_entsize(int index, Elf64_Info_Shdr *sHdrInfo,
@@ -245,8 +231,6 @@ static void sh_entsize(int index, Elf64_Info_Shdr *sHdrInfo,
   elfShdr->sh_entsize =
       byte_get_little_endian(aShdr->a_sh_entsize, sizeof(elfShdr->sh_entsize));
   sHdrInfo->i_sh_entsize = elfShdr->sh_entsize;
-  fprintf(stderr, "[index = %d] sHdrInfo->i_sh_entsize = 0x%lx\n", index,
-          elfShdr->sh_entsize);
 }
 
 int processSectionHeader(const char *inputFileName) {
@@ -259,8 +243,6 @@ int processSectionHeader(const char *inputFileName) {
 
   if (!fseek(fileHandle, sectionHeadersAddress, SEEK_SET))
     for (int i = 0; i < sectionNumber; i++) {
-      fprintf(stderr, "sectionSize = %d\nsectionNumber = %d\n", sectionSize,
-              sectionNumber);
       fread(&auxiliaryElf64Shdr[i], sectionSize, 1, fileHandle);
       sh_name(i, &infoElf64Shdr[i], &sectionHdr[i], &auxiliaryElf64Shdr[i]);
       sh_type(i, &infoElf64Shdr[i], &sectionHdr[i], &auxiliaryElf64Shdr[i]);
