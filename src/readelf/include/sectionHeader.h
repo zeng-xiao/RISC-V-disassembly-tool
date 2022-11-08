@@ -7,8 +7,8 @@ int processSectionHeader(const char *inputFileName);
 typedef struct {
   const char *i_sh_name;
   const char *i_sh_type;
-  const char *i_sh_addr;
   const char *i_sh_flags;
+  Elf64_Off i_sh_addr;
   Elf64_Off i_sh_offset;
   Elf32_Word i_sh_size;
   Elf32_Word i_sh_link;

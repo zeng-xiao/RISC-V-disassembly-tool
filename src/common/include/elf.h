@@ -197,6 +197,71 @@ typedef struct {
   Elf64_Xword sh_entsize;   /* Entry size if section holds table */
 } Elf64_Shdr;
 
+/* Values for section header, sh_type field.  */
+
+#define SHT_NULL 0     /* Section header table entry unused */
+#define SHT_PROGBITS 1 /* Program specific (private) data */
+#define SHT_SYMTAB 2   /* Link editing symbol table */
+#define SHT_STRTAB 3   /* A string table */
+#define SHT_RELA 4     /* Relocation entries with addends */
+#define SHT_HASH 5     /* A symbol hash table */
+#define SHT_DYNAMIC 6  /* Information for dynamic linking */
+#define SHT_NOTE 7     /* Information that marks file */
+#define SHT_NOBITS 8   /* Section occupies no space in file */
+#define SHT_REL 9      /* Relocation entries, no addends */
+#define SHT_SHLIB 10   /* Reserved, unspecified semantics */
+#define SHT_DYNSYM 11  /* Dynamic linking symbol table */
+
+#define SHT_INIT_ARRAY 14    /* Array of ptrs to init functions */
+#define SHT_FINI_ARRAY 15    /* Array of ptrs to finish functions */
+#define SHT_PREINIT_ARRAY 16 /* Array of ptrs to pre-init funcs */
+#define SHT_GROUP 17         /* Section contains a section group */
+#define SHT_SYMTAB_SHNDX 18  /* Indices for SHN_XINDEX entries */
+#define SHT_RELR 19          /* RELR relative relocations */
+
+#define SHT_LOOS 0x60000000 /* First of OS specific semantics */
+#define SHT_HIOS 0x6fffffff /* Last of OS specific semantics */
+
+#define SHT_GNU_INCREMENTAL_INPUTS 0x6fff4700 /* incremental build data */
+#define SHT_GNU_ATTRIBUTES 0x6ffffff5         /* Object attributes */
+#define SHT_GNU_HASH 0x6ffffff6               /* GNU style symbol hash table */
+#define SHT_GNU_LIBLIST 0x6ffffff7            /* List of prelink dependencies */
+
+/* Additional section types.  */
+#define SHT_RISCV_ATTRIBUTES 0x70000003 /* Section holds attributes.  */
+
+/* Values for section header, sh_flags field.  */
+
+#define SHF_WRITE (1 << 0)      /* Writable data during execution */
+#define SHF_ALLOC (1 << 1)      /* Occupies memory during execution */
+#define SHF_EXECINSTR (1 << 2)  /* Executable machine instructions */
+#define SHF_MERGE (1 << 4)      /* Data in this section can be merged */
+#define SHF_STRINGS (1 << 5)    /* Contains null terminated character strings */
+#define SHF_INFO_LINK (1 << 6)  /* sh_info holds section header table index */
+#define SHF_LINK_ORDER (1 << 7) /* Preserve section ordering when linking */
+#define SHF_OS_NONCONFORMING (1 << 8) /* OS specific processing required */
+#define SHF_GROUP (1 << 9)            /* Member of a section group */
+#define SHF_TLS (1 << 10)             /* Thread local storage section */
+#define SHF_COMPRESSED (1 << 11)      /* Section with compressed data */
+
+/* #define SHF_MASKOS	0x0F000000    */ /* OS-specific semantics */
+#define SHF_MASKOS 0x0FF00000            /* New value, Oct 4, 1999 Draft */
+#define SHF_GNU_RETAIN                                                         \
+  (1 << 21) /* Section should not be garbage collected by the linker.  */
+#define SHF_MASKPROC 0xF0000000 /* Processor-specific semantics */
+
+/* This used to be implemented as a processor specific section flag.
+   We just make it generic.  */
+#define SHF_EXCLUDE                                                            \
+  0x80000000 /* Link editor is to exclude                                      \
+                this section from executable                                   \
+                and shared library that it                                     \
+                builds when those objects                                      \
+                are not to be further                                          \
+                relocated.  */
+
+#define SHF_GNU_MBIND 0x01000000 /* Mbind section.  */
+
 #define ENOENT 2 /* No such file or directory */
 
 #endif

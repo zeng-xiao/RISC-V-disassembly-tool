@@ -11,6 +11,7 @@
 Elf64_Off sectionHeadersAddress; /* Section header table file offset */
 Elf64_Half sectionNumber;        /* Section header table entry count */
 Elf64_Half sectionSize;          /* Section header table entry size */
+Elf64_Half sectionShstrtabIndex; /* Section header table entry size */
 
 static int elfHdrIdent(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   strcpy(elfInfo->i_ident, elfHdr->e_ident);
@@ -175,6 +176,7 @@ static void elfHdrShnum(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
 
 static void elfHdrShstrndx(Elf64_Ehdr *elfHdr, Elf64_Info_Ehdr *elfInfo) {
   elfInfo->i_shstrndx = elfHdr->e_shstrndx;
+  sectionShstrtabIndex = elfHdr->e_shstrndx;
 }
 
 static void printfElf64Header(Elf64_Info_Ehdr *elfInfo) {
@@ -211,7 +213,7 @@ static void printfElf64Header(Elf64_Info_Ehdr *elfInfo) {
           elfInfo->i_shoff);
   fprintf(stderr, "  Flags:                             %u%s\n",
           elfInfo->i_flags, elfInfo->i_flagStatement);
-  fprintf(stderr, "  Size of this header:               %u (bytes)\n",
+  fprintf(stderr, "  Size of this ELF header:           %u (bytes)\n",
           elfInfo->i_ehsize);
   fprintf(stderr, "  Size of program headers:           %u (bytes)\n",
           elfInfo->i_phentsize);
