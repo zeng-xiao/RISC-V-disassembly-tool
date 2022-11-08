@@ -16,11 +16,12 @@ int main(int argc, char **argv) {
   processSectionHeader(inputFileName);
   processProgramHeader(inputFileName);
 
-  dumpText(inputFileName);
   dumpDebug_str(inputFileName);
   dumpComment(inputFileName);
   dumpRiscv_attributes(inputFileName);
   dumpGCCcommandline(inputFileName);
+
+  disassembleText(inputFileName);
 
   return 0;
 }
