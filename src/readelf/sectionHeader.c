@@ -22,113 +22,113 @@ static void printfElf64Header(Elf64_Info_Shdr *i_shdr) {
           "EntrySize Flags "
           "LinkToSection Info "
           "Alignment\n");
-  for (int index = 0; index < shdrNumber; index++) {
+  for (int shdrIndex = 0; shdrIndex < shdrNumber; shdrIndex++) {
     fprintf(
         stderr,
         "  [%02d]    %-19s      %-16s  %016lx "
         "%06lx              %06lx      %03lx       %s    %02d            %02d  "
         "     %lx\n",
-        index, i_shdr[index].i_sh_name, i_shdr[index].i_sh_type,
-        i_shdr[index].i_sh_addr, i_shdr[index].i_sh_offset,
-        i_shdr[index].i_sh_size, i_shdr[index].i_sh_entsize,
-        i_shdr[index].i_sh_flags, i_shdr[index].i_sh_link,
-        i_shdr[index].i_sh_info, i_shdr[index].i_sh_addralign);
+        shdrIndex, i_shdr[shdrIndex].i_sh_name, i_shdr[shdrIndex].i_sh_type,
+        i_shdr[shdrIndex].i_sh_addr, i_shdr[shdrIndex].i_sh_offset,
+        i_shdr[shdrIndex].i_sh_size, i_shdr[shdrIndex].i_sh_entsize,
+        i_shdr[shdrIndex].i_sh_flags, i_shdr[shdrIndex].i_sh_link,
+        i_shdr[shdrIndex].i_sh_info, i_shdr[shdrIndex].i_sh_addralign);
   }
   fprintf(stderr, "\n\n");
 }
 
-static void sh_name(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
-                    Elf64_Info_Shdr *i_shdr) {
-  shdr[index].sh_name = byte_get_little_endian(a_shdr[index].a_sh_name,
-                                               sizeof(shdr[index].sh_name));
+static void sh_name(int shdrIndex, Elf64_Shdr *shdr,
+                    Elf64_Auxiliary_Shdr *a_shdr, Elf64_Info_Shdr *i_shdr) {
+  shdr[shdrIndex].sh_name = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_name, sizeof(shdr[shdrIndex].sh_name));
 }
 
-static void sh_name_str(int index, Elf64_Shdr *shdr, Elf64_Info_Shdr *i_shdr,
-                        FILE *fileHandle) {
+static void sh_name_str(int shdrIndex, Elf64_Shdr *shdr,
+                        Elf64_Info_Shdr *i_shdr, FILE *fileHandle) {
   char *strBuffer = (char *)malloc(1024);
   uint64_t strOffset;
 
-  strOffset = shdr[shdrStrtabIndex].sh_offset + shdr[index].sh_name;
+  strOffset = shdr[shdrStrtabIndex].sh_offset + shdr[shdrIndex].sh_name;
   if (!fseek(fileHandle, strOffset, SEEK_SET))
     fscanf(fileHandle, "%s", strBuffer);
-  i_shdr[index].i_sh_name = strBuffer;
+  i_shdr[shdrIndex].i_sh_name = strBuffer;
 }
 
-static void sh_type(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
-                    Elf64_Info_Shdr *i_shdr) {
-  shdr[index].sh_type = byte_get_little_endian(a_shdr[index].a_sh_type,
-                                               sizeof(shdr[index].sh_type));
+static void sh_type(int shdrIndex, Elf64_Shdr *shdr,
+                    Elf64_Auxiliary_Shdr *a_shdr, Elf64_Info_Shdr *i_shdr) {
+  shdr[shdrIndex].sh_type = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_type, sizeof(shdr[shdrIndex].sh_type));
 
-  switch (shdr[index].sh_type) {
+  switch (shdr[shdrIndex].sh_type) {
   case SHT_NULL:
-    i_shdr[index].i_sh_type = "NULL";
+    i_shdr[shdrIndex].i_sh_type = "NULL";
     break;
   case SHT_DYNSYM:
-    i_shdr[index].i_sh_type = "DYNSYM";
+    i_shdr[shdrIndex].i_sh_type = "DYNSYM";
     break;
 
   case SHT_STRTAB:
-    i_shdr[index].i_sh_type = "STRTAB";
+    i_shdr[shdrIndex].i_sh_type = "STRTAB";
     break;
 
   case SHT_SYMTAB_SHNDX:
-    i_shdr[index].i_sh_type = "SYMTAB_SHNDX";
+    i_shdr[shdrIndex].i_sh_type = "SYMTAB_SHNDX";
     break;
 
   case SHT_SYMTAB:
-    i_shdr[index].i_sh_type = "SYMTAB";
+    i_shdr[shdrIndex].i_sh_type = "SYMTAB";
     break;
 
   case SHT_GROUP:
-    i_shdr[index].i_sh_type = "GROUP";
+    i_shdr[shdrIndex].i_sh_type = "GROUP";
     break;
 
   case SHT_REL:
-    i_shdr[index].i_sh_type = "REL";
+    i_shdr[shdrIndex].i_sh_type = "REL";
     break;
 
   case SHT_RELA:
-    i_shdr[index].i_sh_type = "RELA";
+    i_shdr[shdrIndex].i_sh_type = "RELA";
     break;
 
   case SHT_RELR:
-    i_shdr[index].i_sh_type = "RELR";
+    i_shdr[shdrIndex].i_sh_type = "RELR";
     break;
 
     /* Having a zero sized section is not illegal according to the ELF
      * standard, but it might be an indication that something is wrong.  So
      * issue a warning if we are running in lint mode.  */
   case SHT_NOTE:
-    i_shdr[index].i_sh_type = "NOTE";
+    i_shdr[shdrIndex].i_sh_type = "NOTE";
     break;
   case SHT_NOBITS:
-    i_shdr[index].i_sh_type = "NOBITS";
+    i_shdr[shdrIndex].i_sh_type = "NOBITS";
     break;
   case SHT_PROGBITS:
-    i_shdr[index].i_sh_type = "PROGBITS";
+    i_shdr[shdrIndex].i_sh_type = "PROGBITS";
     break;
   case SHT_RISCV_ATTRIBUTES:
-    i_shdr[index].i_sh_type = "RISCV_ATTRIBUTES";
+    i_shdr[shdrIndex].i_sh_type = "RISCV_ATTRIBUTES";
   default:
     break;
   }
 
-  if (!i_shdr[index].i_sh_type)
-    i_shdr[index].i_sh_type = "unknown";
+  if (!i_shdr[shdrIndex].i_sh_type)
+    i_shdr[shdrIndex].i_sh_type = "unknown";
 }
 
-static void sh_flags(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
-                     Elf64_Info_Shdr *i_shdr) {
+static void sh_flags(int shdrIndex, Elf64_Shdr *shdr,
+                     Elf64_Auxiliary_Shdr *a_shdr, Elf64_Info_Shdr *i_shdr) {
   static char flagBuffer[1024];
   char *p = flagBuffer;
-  shdr[index].sh_flags = byte_get_little_endian(a_shdr[index].a_sh_flags,
-                                                sizeof(shdr[index].sh_flags));
+  shdr[shdrIndex].sh_flags = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_flags, sizeof(shdr[shdrIndex].sh_flags));
 
-  while (shdr[index].sh_flags) {
+  while (shdr[shdrIndex].sh_flags) {
     uint64_t flag;
 
-    flag = shdr[index].sh_flags & -shdr[index].sh_flags;
-    shdr[index].sh_flags &= ~flag;
+    flag = shdr[shdrIndex].sh_flags & -shdr[shdrIndex].sh_flags;
+    shdr[shdrIndex].sh_flags &= ~flag;
     switch (flag) {
     case SHF_WRITE:
       *p = 'W';
@@ -171,57 +171,57 @@ static void sh_flags(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
     }
     p++;
   }
-  i_shdr[index].i_sh_flags = flagBuffer;
+  i_shdr[shdrIndex].i_sh_flags = flagBuffer;
 }
 
-static void sh_addr(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
-                    Elf64_Info_Shdr *i_shdr) {
-  shdr[index].sh_addr = byte_get_little_endian(a_shdr[index].a_sh_addr,
-                                               sizeof(shdr[index].sh_addr));
-  i_shdr[index].i_sh_addr = shdr[index].sh_addr;
+static void sh_addr(int shdrIndex, Elf64_Shdr *shdr,
+                    Elf64_Auxiliary_Shdr *a_shdr, Elf64_Info_Shdr *i_shdr) {
+  shdr[shdrIndex].sh_addr = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_addr, sizeof(shdr[shdrIndex].sh_addr));
+  i_shdr[shdrIndex].i_sh_addr = shdr[shdrIndex].sh_addr;
 }
 
-static void sh_offset(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
-                      Elf64_Info_Shdr *i_shdr) {
-  shdr[index].sh_offset = byte_get_little_endian(a_shdr[index].a_sh_offset,
-                                                 sizeof(shdr[index].sh_offset));
-  i_shdr[index].i_sh_offset = shdr[index].sh_offset;
+static void sh_offset(int shdrIndex, Elf64_Shdr *shdr,
+                      Elf64_Auxiliary_Shdr *a_shdr, Elf64_Info_Shdr *i_shdr) {
+  shdr[shdrIndex].sh_offset = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_offset, sizeof(shdr[shdrIndex].sh_offset));
+  i_shdr[shdrIndex].i_sh_offset = shdr[shdrIndex].sh_offset;
 }
 
-static void sh_size(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
-                    Elf64_Info_Shdr *i_shdr) {
-  shdr[index].sh_size = byte_get_little_endian(a_shdr[index].a_sh_size,
-                                               sizeof(shdr[index].sh_size));
-  i_shdr[index].i_sh_size = shdr[index].sh_size;
+static void sh_size(int shdrIndex, Elf64_Shdr *shdr,
+                    Elf64_Auxiliary_Shdr *a_shdr, Elf64_Info_Shdr *i_shdr) {
+  shdr[shdrIndex].sh_size = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_size, sizeof(shdr[shdrIndex].sh_size));
+  i_shdr[shdrIndex].i_sh_size = shdr[shdrIndex].sh_size;
 }
 
-static void sh_link(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
-                    Elf64_Info_Shdr *i_shdr) {
-  shdr[index].sh_link = byte_get_little_endian(a_shdr[index].a_sh_link,
-                                               sizeof(shdr[index].sh_link));
-  i_shdr[index].i_sh_link = shdr[index].sh_link;
+static void sh_link(int shdrIndex, Elf64_Shdr *shdr,
+                    Elf64_Auxiliary_Shdr *a_shdr, Elf64_Info_Shdr *i_shdr) {
+  shdr[shdrIndex].sh_link = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_link, sizeof(shdr[shdrIndex].sh_link));
+  i_shdr[shdrIndex].i_sh_link = shdr[shdrIndex].sh_link;
 }
 
-static void sh_info(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
-                    Elf64_Info_Shdr *i_shdr) {
-  shdr[index].sh_info = byte_get_little_endian(a_shdr[index].a_sh_info,
-                                               sizeof(shdr[index].sh_info));
-  i_shdr[index].i_sh_info = shdr[index].sh_info;
+static void sh_info(int shdrIndex, Elf64_Shdr *shdr,
+                    Elf64_Auxiliary_Shdr *a_shdr, Elf64_Info_Shdr *i_shdr) {
+  shdr[shdrIndex].sh_info = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_info, sizeof(shdr[shdrIndex].sh_info));
+  i_shdr[shdrIndex].i_sh_info = shdr[shdrIndex].sh_info;
 }
 
-static void sh_addralign(int index, Elf64_Shdr *shdr,
+static void sh_addralign(int shdrIndex, Elf64_Shdr *shdr,
                          Elf64_Auxiliary_Shdr *a_shdr,
                          Elf64_Info_Shdr *i_shdr) {
-  shdr[index].sh_addralign = byte_get_little_endian(
-      a_shdr[index].a_sh_addralign, sizeof(shdr[index].sh_addralign));
-  i_shdr[index].i_sh_addralign = shdr[index].sh_addralign;
+  shdr[shdrIndex].sh_addralign = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_addralign, sizeof(shdr[shdrIndex].sh_addralign));
+  i_shdr[shdrIndex].i_sh_addralign = shdr[shdrIndex].sh_addralign;
 }
 
-static void sh_entsize(int index, Elf64_Shdr *shdr,
+static void sh_entsize(int shdrIndex, Elf64_Shdr *shdr,
                        Elf64_Auxiliary_Shdr *a_shdr, Elf64_Info_Shdr *i_shdr) {
-  shdr[index].sh_entsize = byte_get_little_endian(
-      a_shdr[index].a_sh_entsize, sizeof(shdr[index].sh_entsize));
-  i_shdr[index].i_sh_entsize = shdr[index].sh_entsize;
+  shdr[shdrIndex].sh_entsize = byte_get_little_endian(
+      a_shdr[shdrIndex].a_sh_entsize, sizeof(shdr[shdrIndex].sh_entsize));
+  i_shdr[shdrIndex].i_sh_entsize = shdr[shdrIndex].sh_entsize;
 }
 
 int processSectionHeader(const char *inputFileName) {
@@ -232,23 +232,23 @@ int processSectionHeader(const char *inputFileName) {
   Elf64_Auxiliary_Shdr a_shdr[shdrNumber];
 
   if (!fseek(fileHandle, shdrAddress, SEEK_SET))
-    for (int index = 0; index < shdrNumber; index++) {
-      fread(&a_shdr[index], shdrSize, 1, fileHandle);
+    for (int shdrIndex = 0; shdrIndex < shdrNumber; shdrIndex++) {
+      fread(&a_shdr[shdrIndex], shdrSize, 1, fileHandle);
 
-      sh_name(index, shdr, a_shdr, i_shdr);
-      sh_type(index, shdr, a_shdr, i_shdr);
-      sh_flags(index, shdr, a_shdr, i_shdr);
-      sh_addr(index, shdr, a_shdr, i_shdr);
-      sh_offset(index, shdr, a_shdr, i_shdr);
-      sh_size(index, shdr, a_shdr, i_shdr);
-      sh_link(index, shdr, a_shdr, i_shdr);
-      sh_info(index, shdr, a_shdr, i_shdr);
-      sh_addralign(index, shdr, a_shdr, i_shdr);
-      sh_entsize(index, shdr, a_shdr, i_shdr);
+      sh_name(shdrIndex, shdr, a_shdr, i_shdr);
+      sh_type(shdrIndex, shdr, a_shdr, i_shdr);
+      sh_flags(shdrIndex, shdr, a_shdr, i_shdr);
+      sh_addr(shdrIndex, shdr, a_shdr, i_shdr);
+      sh_offset(shdrIndex, shdr, a_shdr, i_shdr);
+      sh_size(shdrIndex, shdr, a_shdr, i_shdr);
+      sh_link(shdrIndex, shdr, a_shdr, i_shdr);
+      sh_info(shdrIndex, shdr, a_shdr, i_shdr);
+      sh_addralign(shdrIndex, shdr, a_shdr, i_shdr);
+      sh_entsize(shdrIndex, shdr, a_shdr, i_shdr);
     }
 
-  for (int index = 0; index < shdrNumber; index++)
-    sh_name_str(index, shdr, i_shdr, fileHandle);
+  for (int shdrIndex = 0; shdrIndex < shdrNumber; shdrIndex++)
+    sh_name_str(shdrIndex, shdr, i_shdr, fileHandle);
 
   closeFile(fileHandle);
 
