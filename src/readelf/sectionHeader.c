@@ -45,17 +45,13 @@ static void sh_name(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
 
 static void sh_name_str(int index, Elf64_Shdr *shdr, Elf64_Info_Shdr *i_shdr,
                         FILE *fileHandle) {
-  char *strBuffer = (char *)malloc(1000);
+  char *strBuffer = (char *)malloc(1024);
   uint64_t strOffset;
 
-  if (!index)
-    i_shdr[index].i_sh_name = "     ";
-  else {
-    strOffset = shdr[sectionShstrtabIndex].sh_offset + shdr[index].sh_name;
-    if (!fseek(fileHandle, strOffset, SEEK_SET))
-      fscanf(fileHandle, "%s", strBuffer);
-    i_shdr[index].i_sh_name = strBuffer;
-  }
+  strOffset = shdr[sectionShstrtabIndex].sh_offset + shdr[index].sh_name;
+  if (!fseek(fileHandle, strOffset, SEEK_SET))
+    fscanf(fileHandle, "%s", strBuffer);
+  i_shdr[index].i_sh_name = strBuffer;
 }
 
 static void sh_type(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
@@ -123,8 +119,8 @@ static void sh_type(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
 
 static void sh_flags(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
                      Elf64_Info_Shdr *i_shdr) {
-  static char buff[1024];
-  char *p = buff;
+  static char flagBuffer[1024];
+  char *p = flagBuffer;
   shdr[index].sh_flags = byte_get_little_endian(a_shdr[index].a_sh_flags,
                                                 sizeof(shdr[index].sh_flags));
 
@@ -175,7 +171,7 @@ static void sh_flags(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
     }
     p++;
   }
-  i_shdr[index].i_sh_flags = buff;
+  i_shdr[index].i_sh_flags = flagBuffer;
 }
 
 static void sh_addr(int index, Elf64_Shdr *shdr, Elf64_Auxiliary_Shdr *a_shdr,
@@ -229,7 +225,6 @@ static void sh_entsize(int index, Elf64_Shdr *shdr,
 }
 
 int processSectionHeader(const char *inputFileName) {
-
   FILE *fileHandle = fopen(inputFileName, "rb");
 
   Elf64_Shdr shdr[sectionNumber];
