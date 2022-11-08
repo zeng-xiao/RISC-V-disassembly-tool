@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "elf.h"
 
@@ -12,29 +13,25 @@ extern Elf64_Half sectionSize;
 extern Elf64_Half sectionShstrtabIndex;
 
 static void printfElf64Header(Elf64_Info_Shdr *elfInfo) {
-  //   for (int i = 0; i < sectionNumber; i++)
-  //     fprintf(stderr,
-  //             "[index = %d] elfInfo[i].i_sh_name = "
-  //             "%s\nelfInfo[%d].i_sh_name = %p\n",
-  //             i, elfInfo[i].i_sh_name, i, &elfInfo[i].i_sh_name);
-
   fprintf(stderr, "\n\n");
 
   fprintf(stderr, "Section Headers Info:\n");
-  fprintf(
-      stderr,
-      "  [Nr]        Name              SectionType            Address   "
-      "SectionOffsetInFile    SectionSize   EntrySize Flags LinkToSection Info "
-      "Alignment\n");
+  fprintf(stderr,
+          "  [Nr]    Name                     SectionType       Address   "
+          "       SectionOffsetInFile SectionSize "
+          "EntrySize Flags "
+          "LinkToSection Info "
+          "Alignment\n");
   for (int i = 0; i < sectionNumber; i++) {
-    fprintf(stderr,
-            "  [%02d]    %s              %s            %016lx          "
-            "%06lx    %06lx   %lx %s %d %d %lx\n",
-            i, elfInfo[i].i_sh_name, elfInfo[i].i_sh_type, elfInfo[i].i_sh_addr,
-            elfInfo[i].i_sh_offset, elfInfo[i].i_sh_size,
-            elfInfo[i].i_sh_entsize, elfInfo[i].i_sh_flags,
-            elfInfo[i].i_sh_link, elfInfo[i].i_sh_info,
-            elfInfo[i].i_sh_addralign);
+    fprintf(
+        stderr,
+        "  [%02d]    %-19s      %-16s  %016lx "
+        "%06lx              %06lx      %03lx       %s    %02d            %02d  "
+        "     %lx\n",
+        i, elfInfo[i].i_sh_name, elfInfo[i].i_sh_type, elfInfo[i].i_sh_addr,
+        elfInfo[i].i_sh_offset, elfInfo[i].i_sh_size, elfInfo[i].i_sh_entsize,
+        elfInfo[i].i_sh_flags, elfInfo[i].i_sh_link, elfInfo[i].i_sh_info,
+        elfInfo[i].i_sh_addralign);
   }
   fprintf(stderr, "\n\n");
 }
@@ -46,13 +43,12 @@ static void sh_name(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
 }
 
 static void sh_name_str(int index, Elf64_Info_Shdr *sHdrInfo,
-                        Elf64_Shdr *elfShdr, const char *inputFileName) {
-  char strBuffer[255];
+                        Elf64_Shdr *elfShdr, FILE *fileHandle) {
+  char *strBuffer = (char *)malloc(1000);
   uint64_t strOffset;
-  FILE *fileHandle = fopen(inputFileName, "rb");
 
   if (!index)
-    sHdrInfo->i_sh_name = "";
+    sHdrInfo->i_sh_name = "     ";
   else {
     strOffset =
         elfShdr[sectionShstrtabIndex].sh_offset + elfShdr[index].sh_name;
@@ -60,8 +56,6 @@ static void sh_name_str(int index, Elf64_Info_Shdr *sHdrInfo,
       fscanf(fileHandle, "%s", strBuffer);
     sHdrInfo->i_sh_name = strBuffer;
   }
-
-  closeFile(fileHandle);
 }
 
 static void sh_type(int index, Elf64_Info_Shdr *sHdrInfo, Elf64_Shdr *elfShdr,
@@ -256,11 +250,10 @@ int processSectionHeader(const char *inputFileName) {
                    &auxiliaryElf64Shdr[i]);
       sh_entsize(i, &infoElf64Shdr[i], &sectionHdr[i], &auxiliaryElf64Shdr[i]);
     }
-  closeFile(fileHandle);
 
   for (int i = 0; i < sectionNumber; i++)
-    sh_name_str(i, &infoElf64Shdr[i], sectionHdr, inputFileName);
-
+    sh_name_str(i, &infoElf64Shdr[i], sectionHdr, fileHandle);
+  closeFile(fileHandle);
   printfElf64Header(infoElf64Shdr);
 
   return 0;
