@@ -8,7 +8,7 @@
 extern Elf64_Off shdrGCCcommandlineOff;
 extern Elf64_Xword shdrGCCcommandlineSize;
 
-int dumpGCCcommandline(const char *inputFileName) {
+int dumpGCC_command_line(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");
 
   fprintf(stderr, "\n\n");

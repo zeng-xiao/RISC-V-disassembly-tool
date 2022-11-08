@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
   dumpDebug_str(inputFileName);
   dumpComment(inputFileName);
   dumpRiscv_attributes(inputFileName);
-  dumpGCCcommandline(inputFileName);
+  dumpGCC_command_line(inputFileName);
 
   analysisDebug_frame(inputFileName);
 
