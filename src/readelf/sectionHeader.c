@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "elf.h"
 
@@ -12,6 +13,18 @@ extern Elf64_Half shdrNumber;
 extern Elf64_Half shdrSize;
 extern Elf64_Half shdrStrtabIndex;
 
+Elf64_Off shdrDebug_strOff = 0;
+Elf64_Xword shdrDebug_strSize = 0;
+
+Elf64_Off shdrCommentOff = 0;
+Elf64_Xword shdrCommentSize = 0;
+
+Elf64_Off shdrRiscv_attributesOff = 0;
+Elf64_Xword shdrRiscv_attributesSize = 0;
+
+Elf64_Off shdrGCCcommandlineOff = 0;
+Elf64_Xword shdrGCCcommandlineSize = 0;
+
 static void printfElf64Header(Elf64_Info_Shdr *i_shdr) {
   fprintf(stderr, "\n\n");
 
@@ -22,6 +35,7 @@ static void printfElf64Header(Elf64_Info_Shdr *i_shdr) {
           "EntrySize Flags "
           "LinkToSection Info "
           "Alignment\n");
+
   for (int shdrIndex = 0; shdrIndex < shdrNumber; shdrIndex++) {
     fprintf(
         stderr,
@@ -34,6 +48,7 @@ static void printfElf64Header(Elf64_Info_Shdr *i_shdr) {
         i_shdr[shdrIndex].i_sh_flags, i_shdr[shdrIndex].i_sh_link,
         i_shdr[shdrIndex].i_sh_info, i_shdr[shdrIndex].i_sh_addralign);
   }
+
   fprintf(stderr, "\n\n");
 }
 
@@ -52,6 +67,26 @@ static void sh_name_str(int shdrIndex, Elf64_Shdr *shdr,
   if (!fseek(fileHandle, strOffset, SEEK_SET))
     fscanf(fileHandle, "%s", strBuffer);
   i_shdr[shdrIndex].i_sh_name = strBuffer;
+
+  if (!strcmp(".debug_str", strBuffer)) {
+    shdrDebug_strOff = shdr[shdrIndex].sh_offset;
+    shdrDebug_strSize = shdr[shdrIndex].sh_size;
+  }
+
+  if (!strcmp(".comment", strBuffer)) {
+    shdrCommentOff = shdr[shdrIndex].sh_offset;
+    shdrCommentSize = shdr[shdrIndex].sh_size;
+  }
+
+  if (!strcmp(".riscv.attributes", strBuffer)) {
+    shdrRiscv_attributesOff = shdr[shdrIndex].sh_offset;
+    shdrRiscv_attributesSize = shdr[shdrIndex].sh_size;
+  }
+
+  if (!strcmp(".GCC.command.line", strBuffer)) {
+    shdrGCCcommandlineOff = shdr[shdrIndex].sh_offset;
+    shdrGCCcommandlineSize = shdr[shdrIndex].sh_size;
+  }
 }
 
 static void sh_type(int shdrIndex, Elf64_Shdr *shdr,
