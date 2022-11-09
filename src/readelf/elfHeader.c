@@ -8,10 +8,10 @@
 
 #include "elfHeader.h"
 
-Elf64_Off shdrAddress;      /* Section header table file offset */
-Elf64_Half shdrNumber;      /* Section header table entry count */
-Elf64_Half shdrSize;        /* Section header table entry size */
-Elf64_Half shdrStrtabIndex; /* Section header table entry size */
+uint64_t shdrAddress;     /* Section header table file offset */
+uint16_t shdrNumber;      /* Section header table entry count */
+uint16_t shdrSize;        /* Section header table entry size */
+uint16_t shdrStrtabIndex; /* Section header table entry size */
 
 static int ehdrIdent(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
   strcpy(elfInfo->i_ident, ehdr->e_ident);

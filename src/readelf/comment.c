@@ -5,8 +5,8 @@
 
 #include "dataOperate.h"
 
-extern Elf64_Off shdrCommentOff;
-extern Elf64_Xword shdrCommentSize;
+extern uint64_t shdrCommentOff;
+extern uint64_t shdrCommentSize;
 
 int dumpComment(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");

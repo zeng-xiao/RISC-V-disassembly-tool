@@ -8,25 +8,25 @@
 #include "dataOperate.h"
 #include "sectionHeader.h"
 
-extern Elf64_Off shdrAddress;
-extern Elf64_Half shdrNumber;
-extern Elf64_Half shdrSize;
-extern Elf64_Half shdrStrtabIndex;
+extern uint64_t shdrAddress;
+extern uint16_t shdrNumber;
+extern uint16_t shdrSize;
+extern uint16_t shdrStrtabIndex;
 
-Elf64_Off shdrDebug_strOff = 0;
-Elf64_Xword shdrDebug_strSize = 0;
+uint64_t shdrDebug_strOff = 0;
+uint64_t shdrDebug_strSize = 0;
 
-Elf64_Off shdrCommentOff = 0;
-Elf64_Xword shdrCommentSize = 0;
+uint64_t shdrCommentOff = 0;
+uint64_t shdrCommentSize = 0;
 
-Elf64_Off shdrRiscv_attributesOff = 0;
-Elf64_Xword shdrRiscv_attributesSize = 0;
+uint64_t shdrRiscv_attributesOff = 0;
+uint64_t shdrRiscv_attributesSize = 0;
 
-Elf64_Off shdrGCCcommandlineOff = 0;
-Elf64_Xword shdrGCCcommandlineSize = 0;
+uint64_t shdrGCCcommandlineOff = 0;
+uint64_t shdrGCCcommandlineSize = 0;
 
-Elf64_Off shdrTextOff = 0;
-Elf64_Xword shdrTextSize = 0;
+uint64_t shdrTextOff = 0;
+uint64_t shdrTextSize = 0;
 
 static void printfElf64Header(Elf64_Info_Shdr *i_shdr) {
   fprintf(stderr, "\n\n");

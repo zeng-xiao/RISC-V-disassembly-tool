@@ -5,8 +5,8 @@
 
 #include "dataOperate.h"
 
-extern Elf64_Off shdrGCCcommandlineOff;
-extern Elf64_Xword shdrGCCcommandlineSize;
+extern uint64_t shdrGCCcommandlineOff;
+extern uint64_t shdrGCCcommandlineSize;
 
 int dumpGCC_command_line(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");

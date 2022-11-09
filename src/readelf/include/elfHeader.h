@@ -10,44 +10,44 @@ int processElfHeader(const char *inputFileName);
 
 /* ELF Header (32-bit implementations) */
 typedef struct {
-  unsigned char a_e_ident[16];    /* ELF "magic number" */
-  unsigned char a_e_type[2];      /* Identifies object file type */
-  unsigned char a_e_machine[2];   /* Specifies required architecture */
-  unsigned char a_e_version[4];   /* Identifies object file version */
-  unsigned char a_e_entry[4];     /* Entry point virtual address */
-  unsigned char a_e_phoff[4];     /* Program header table file offset */
-  unsigned char a_e_shoff[4];     /* Section header table file offset */
-  unsigned char a_e_flags[4];     /* Processor-specific flags */
-  unsigned char a_e_ehsize[2];    /* ELF header size in bytes */
-  unsigned char a_e_phentsize[2]; /* Program header table entry size */
-  unsigned char a_e_phnum[2];     /* Program header table entry count */
-  unsigned char a_e_shentsize[2]; /* Section header table entry size */
-  unsigned char a_e_shnum[2];     /* Section header table entry count */
-  unsigned char a_e_shstrndx[2];  /* Section header string table index */
+  uint8_t a_e_ident[16];    /* ELF "magic number" */
+  uint8_t a_e_type[2];      /* Identifies object file type */
+  uint8_t a_e_machine[2];   /* Specifies required architecture */
+  uint8_t a_e_version[4];   /* Identifies object file version */
+  uint8_t a_e_entry[4];     /* Entry point virtual address */
+  uint8_t a_e_phoff[4];     /* Program header table file offset */
+  uint8_t a_e_shoff[4];     /* Section header table file offset */
+  uint8_t a_e_flags[4];     /* Processor-specific flags */
+  uint8_t a_e_ehsize[2];    /* ELF header size in bytes */
+  uint8_t a_e_phentsize[2]; /* Program header table entry size */
+  uint8_t a_e_phnum[2];     /* Program header table entry count */
+  uint8_t a_e_shentsize[2]; /* Section header table entry size */
+  uint8_t a_e_shnum[2];     /* Section header table entry count */
+  uint8_t a_e_shstrndx[2];  /* Section header string table index */
 } Elf32_Auxiliary_Ehdr;
 
 /* ELF Header (64-bit implementations) */
 typedef struct {
-  unsigned char a_e_ident[16];    /* ELF "magic number" */
-  unsigned char a_e_type[2];      /* Identifies object file type */
-  unsigned char a_e_machine[2];   /* Specifies required architecture */
-  unsigned char a_e_version[4];   /* Identifies object file version */
-  unsigned char a_e_entry[8];     /* Entry point virtual address */
-  unsigned char a_e_phoff[8];     /* Program header table file offset */
-  unsigned char a_e_shoff[8];     /* Section header table file offset */
-  unsigned char a_e_flags[4];     /* Processor-specific flags */
-  unsigned char a_e_ehsize[2];    /* ELF header size in bytes */
-  unsigned char a_e_phentsize[2]; /* Program header table entry size */
-  unsigned char a_e_phnum[2];     /* Program header table entry count */
-  unsigned char a_e_shentsize[2]; /* Section header table entry size */
-  unsigned char a_e_shnum[2];     /* Section header table entry count */
-  unsigned char a_e_shstrndx[2];  /* Section header string table index */
+  uint8_t a_e_ident[16];    /* ELF "magic number" */
+  uint8_t a_e_type[2];      /* Identifies object file type */
+  uint8_t a_e_machine[2];   /* Specifies required architecture */
+  uint8_t a_e_version[4];   /* Identifies object file version */
+  uint8_t a_e_entry[8];     /* Entry point virtual address */
+  uint8_t a_e_phoff[8];     /* Program header table file offset */
+  uint8_t a_e_shoff[8];     /* Section header table file offset */
+  uint8_t a_e_flags[4];     /* Processor-specific flags */
+  uint8_t a_e_ehsize[2];    /* ELF header size in bytes */
+  uint8_t a_e_phentsize[2]; /* Program header table entry size */
+  uint8_t a_e_phnum[2];     /* Program header table entry count */
+  uint8_t a_e_shentsize[2]; /* Section header table entry size */
+  uint8_t a_e_shnum[2];     /* Section header table entry count */
+  uint8_t a_e_shstrndx[2];  /* Section header string table index */
 } Elf64_Auxiliary_Ehdr;
 
 #define EI_NIDENT (16)
 
 typedef struct {
-  unsigned char i_ident[EI_NIDENT]; /* Magic number and other info */
+  uint8_t i_ident[EI_NIDENT]; /* Magic number and other info */
 
   const char *i_class;
   const char *i_dataEncodingForm;

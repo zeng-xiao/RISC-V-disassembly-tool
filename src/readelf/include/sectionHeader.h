@@ -8,13 +8,13 @@ typedef struct {
   const char *i_sh_name;
   const char *i_sh_type;
   const char *i_sh_flags;
-  Elf64_Off i_sh_addr;
-  Elf64_Off i_sh_offset;
-  Elf64_Xword i_sh_size;
-  Elf64_Word i_sh_link;
-  Elf64_Word i_sh_info;
-  Elf64_Xword i_sh_addralign;
-  Elf64_Xword i_sh_entsize;
+  uint64_t i_sh_addr;
+  uint64_t i_sh_offset;
+  uint64_t i_sh_size;
+  uint32_t i_sh_link;
+  uint32_t i_sh_info;
+  uint64_t i_sh_addralign;
+  uint64_t i_sh_entsize;
 } Elf64_Info_Shdr;
 
 /* ELF Header (64-bit implementations) */

@@ -5,8 +5,8 @@
 
 #include "dataOperate.h"
 
-extern Elf64_Off shdrDebug_strOff;
-extern Elf64_Xword shdrDebug_strSize;
+extern uint64_t shdrDebug_strOff;
+extern uint64_t shdrDebug_strSize;
 
 int dumpDebug_str(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");

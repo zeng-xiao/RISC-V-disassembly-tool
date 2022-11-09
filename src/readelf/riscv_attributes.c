@@ -5,8 +5,8 @@
 
 #include "dataOperate.h"
 
-extern Elf64_Off shdrRiscv_attributesOff;
-extern Elf64_Xword shdrRiscv_attributesSize;
+extern uint64_t shdrRiscv_attributesOff;
+extern uint64_t shdrRiscv_attributesSize;
 
 int dumpRiscv_attributes(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");

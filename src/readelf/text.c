@@ -9,11 +9,11 @@
 
 #include "instructions.def"
 
-extern Elf64_Off shdrTextOff;
-extern Elf64_Xword shdrTextSize;
+extern uint64_t shdrTextOff;
+extern uint64_t shdrTextSize;
 
-static unsigned char compressionInstruction = 2;
-static unsigned char uncompressionInstruction = 4;
+static uint8_t compressionInstruction = 2;
+static uint8_t uncompressionInstruction = 4;
 
 static int32_t instructionIndex = 0;
 
