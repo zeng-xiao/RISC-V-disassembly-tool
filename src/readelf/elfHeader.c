@@ -117,36 +117,39 @@ static void ehdrShoff(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
 }
 
 static void ehdrFlag(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
+  static char buff[1024];
+
   elfInfo->i_flags = ehdr->e_flags;
 
   if (ehdr->e_machine == EM_RISCV) {
     if (ehdr->e_flags & EF_RISCV_RVC)
-      strcat(elfInfo->i_flagStatement, ", RVC");
+      strcat(buff, ", RVC");
 
     if (ehdr->e_flags & EF_RISCV_RVE)
-      strcat(elfInfo->i_flagStatement, ", RVE");
+      strcat(buff, ", RVE");
 
     switch (ehdr->e_flags & EF_RISCV_FLOAT_ABI) {
     case EF_RISCV_FLOAT_ABI_SOFT:
-      strcat(elfInfo->i_flagStatement, ", soft-float ABI");
+      strcat(buff, ", soft-float ABI");
       break;
 
     case EF_RISCV_FLOAT_ABI_SINGLE:
-      strcat(elfInfo->i_flagStatement, ", single-float ABI");
+      strcat(buff, ", single-float ABI");
       break;
 
     case EF_RISCV_FLOAT_ABI_DOUBLE:
-      strcat(elfInfo->i_flagStatement, ", double-float ABI");
+      strcat(buff, ", double-float ABI");
       break;
 
     case EF_RISCV_FLOAT_ABI_QUAD:
-      strcat(elfInfo->i_flagStatement, ", quad-float ABI");
+      strcat(buff, ", quad-float ABI");
       break;
 
     default:
       printf("Unsupported RISC-V flag\n");
       abort();
     }
+    elfInfo->i_flagStatement = buff;
   }
 }
 

@@ -55,20 +55,22 @@ typedef struct {
   const char *i_osAbi;
   uint32_t i_abiVersion; /* ABI version */
 
-  const char *i_type;        /* Object file type */
-  const char *i_machine;     /* Architecture */
-  uint32_t i_objectVersion;  /* Object file version */
-  uint64_t i_entry;          /* Entry point virtual address */
-  uint64_t i_phoff;          /* Program header table file offset */
-  uint64_t i_shoff;          /* Section header table file offset */
-  uint32_t i_flags;          /* Processor-specific flags */
-  char i_flagStatement[100]; /* Architecture */
-  uint16_t i_ehsize;         /* ELF header size in bytes */
-  uint16_t i_phentsize;      /* Program header table entry size */
-  uint16_t i_phnum;          /* Program header table entry count */
-  uint16_t i_shentsize;      /* Section header table entry size */
-  uint16_t i_shnum;          /* Section header table entry count */
-  uint16_t i_shstrndx;       /* Section header string table index */
+  const char *i_type;       /* Object file type */
+  const char *i_machine;    /* Architecture */
+  uint32_t i_objectVersion; /* Object file version */
+  uint64_t i_entry;         /* Entry point virtual address */
+  uint64_t i_phoff;         /* Program header table file offset */
+  uint64_t i_shoff;         /* Section header table file offset */
+
+  uint32_t i_flags;            /* Processor-specific flags */
+  const char *i_flagStatement; /* Architecture */
+
+  uint16_t i_ehsize;    /* ELF header size in bytes */
+  uint16_t i_phentsize; /* Program header table entry size */
+  uint16_t i_phnum;     /* Program header table entry count */
+  uint16_t i_shentsize; /* Section header table entry size */
+  uint16_t i_shnum;     /* Section header table entry count */
+  uint16_t i_shstrndx;  /* Section header string table index */
 } Elf64_Info_Ehdr;
 
 #endif
