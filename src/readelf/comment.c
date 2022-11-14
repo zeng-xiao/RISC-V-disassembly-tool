@@ -22,7 +22,7 @@ int dumpComment(const char *inputFileName) {
   char *strBuffer = (char *)malloc(shdrCommentSize);
 
   if (!fseek(fileHandle, shdrCommentOff, SEEK_SET))
-    fread(strBuffer, shdrCommentSize, 1, fileHandle);
+    fread(strBuffer, 1, shdrCommentSize, fileHandle);
 
   for (int charIndex = 0; charIndex < shdrCommentSize; charIndex++)
     if (strBuffer[charIndex] == '\0')

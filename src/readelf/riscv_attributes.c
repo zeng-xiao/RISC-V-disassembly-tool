@@ -22,7 +22,7 @@ int dumpRiscv_attributes(const char *inputFileName) {
   char *strBuffer = (char *)malloc(shdrRiscv_attributesSize);
 
   if (!fseek(fileHandle, shdrRiscv_attributesOff, SEEK_SET))
-    fread(strBuffer, shdrRiscv_attributesSize, 1, fileHandle);
+    fread(strBuffer, 1, shdrRiscv_attributesSize, fileHandle);
 
   for (int charIndex = 0; charIndex < shdrRiscv_attributesSize; charIndex++)
     if (strBuffer[charIndex] == '\0')

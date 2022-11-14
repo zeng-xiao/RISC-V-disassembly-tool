@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-int processElfHeader(const char *inputFileName);
+int processElfHeader(const uint8_t *inputFileName);
 
 // This is an auxiliary data structure created by converting bytes
 // read from the outside into corresponding data sizes
@@ -49,21 +49,21 @@ typedef struct {
 typedef struct {
   uint8_t i_ident[EI_NIDENT]; /* Magic number and other info */
 
-  const char *i_class;
-  const char *i_dataEncodingForm;
+  const uint8_t *i_class;
+  const uint8_t *i_dataEncodingForm;
   uint32_t i_fileVersion; /* File version */
-  const char *i_osAbi;
+  const uint8_t *i_osAbi;
   uint32_t i_abiVersion; /* ABI version */
 
-  const char *i_type;       /* Object file type */
-  const char *i_machine;    /* Architecture */
+  const uint8_t *i_type;    /* Object file type */
+  const uint8_t *i_machine; /* Architecture */
   uint32_t i_objectVersion; /* Object file version */
   uint64_t i_entry;         /* Entry point virtual address */
   uint64_t i_phoff;         /* Program header table file offset */
   uint64_t i_shoff;         /* Section header table file offset */
 
-  uint32_t i_flags;            /* Processor-specific flags */
-  const char *i_flagStatement; /* Architecture */
+  uint32_t i_flags;               /* Processor-specific flags */
+  const uint8_t *i_flagStatement; /* Architecture */
 
   uint16_t i_ehsize;    /* ELF header size in bytes */
   uint16_t i_phentsize; /* Program header table entry size */

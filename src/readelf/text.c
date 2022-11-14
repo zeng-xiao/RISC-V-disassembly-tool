@@ -511,7 +511,7 @@ int disassembleText(const char *inputFileName) {
   char *strBufferEnd = strBuffer + shdrTextSize;
 
   if (!fseek(fileHandle, shdrTextOff, SEEK_SET))
-    fread(strBuffer, shdrTextSize, 1, fileHandle);
+    fread(strBuffer, 1, shdrTextSize, fileHandle);
 
   while (strBuffer != strBufferEnd) {
     int32_t instructionEncoding =

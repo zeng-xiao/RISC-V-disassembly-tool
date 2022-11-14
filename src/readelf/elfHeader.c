@@ -117,7 +117,7 @@ static void ehdrShoff(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
 }
 
 static void ehdrFlag(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
-  static char buff[1024];
+  static uint8_t buff[1024];
 
   elfInfo->i_flags = ehdr->e_flags;
 
@@ -227,15 +227,14 @@ static void printfElf64Header(Elf64_Info_Ehdr *elfInfo) {
   fprintf(stderr, "\n\n");
 }
 
-int processElfHeader(const char *inputFileName) {
+int processElfHeader(const uint8_t *inputFileName) {
   Elf64_Ehdr ehdr;
   Elf64_Info_Ehdr i_ehdr;
   Elf64_Auxiliary_Ehdr a_ehdr;
 
   FILE *fileHandle = fopen(inputFileName, "rb");
-
-  fread(a_ehdr.a_e_ident, EI_NIDENT, 1, fileHandle);
-  fread(a_ehdr.a_e_type, sizeof(a_ehdr) - EI_NIDENT, 1, fileHandle);
+  fread(a_ehdr.a_e_ident, 1, EI_NIDENT, fileHandle);
+  fread(a_ehdr.a_e_type, 1, sizeof(a_ehdr) - EI_NIDENT, fileHandle);
 
   closeFile(fileHandle);
 

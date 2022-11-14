@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,9 +62,15 @@ static void sh_name(int shdrIndex, Elf64_Shdr *shdr,
       a_shdr[shdrIndex].a_sh_name, sizeof(shdr[shdrIndex].sh_name));
 }
 
-static void sh_name_str(int shdrIndex, Elf64_Shdr *shdr,
+static bool sh_name_str(int shdrIndex, Elf64_Shdr *shdr,
                         Elf64_Info_Shdr *i_shdr, FILE *fileHandle) {
-  char *strBuffer = (char *)malloc(1024);
+  char *strBuffer = malloc(1024);
+
+  if (!strBuffer) {
+    printf("memory allocation failed for strBuffer\n");
+    return false;
+  }
+
   uint64_t strOffset;
 
   strOffset = shdr[shdrStrtabIndex].sh_offset + shdr[shdrIndex].sh_name;
@@ -276,7 +283,7 @@ int processSectionHeader(const char *inputFileName) {
 
   if (!fseek(fileHandle, shdrAddress, SEEK_SET))
     for (int shdrIndex = 0; shdrIndex < shdrNumber; shdrIndex++) {
-      fread(&a_shdr[shdrIndex], shdrSize, 1, fileHandle);
+      fread(&a_shdr[shdrIndex], 1, shdrSize, fileHandle);
 
       sh_name(shdrIndex, shdr, a_shdr, i_shdr);
       sh_type(shdrIndex, shdr, a_shdr, i_shdr);

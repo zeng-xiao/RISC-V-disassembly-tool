@@ -22,7 +22,7 @@ int dumpGCC_command_line(const char *inputFileName) {
   char *strBuffer = (char *)malloc(shdrGCCcommandlineSize);
 
   if (!fseek(fileHandle, shdrGCCcommandlineOff, SEEK_SET))
-    fread(strBuffer, shdrGCCcommandlineSize, 1, fileHandle);
+    fread(strBuffer, 1, shdrGCCcommandlineSize, fileHandle);
 
   for (int charIndex = 0; charIndex < shdrGCCcommandlineSize; charIndex++)
     if (strBuffer[charIndex] == '\0')

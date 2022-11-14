@@ -22,7 +22,7 @@ int dumpDebug_str(const char *inputFileName) {
   char *strBuffer = (char *)malloc(shdrDebug_strSize);
 
   if (!fseek(fileHandle, shdrDebug_strOff, SEEK_SET))
-    fread(strBuffer, shdrDebug_strSize, 1, fileHandle);
+    fread(strBuffer, 1, shdrDebug_strSize, fileHandle);
 
   for (int charIndex = 0; charIndex < shdrDebug_strSize; charIndex++)
     if (strBuffer[charIndex] == '\0')
