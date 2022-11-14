@@ -29,57 +29,59 @@ static void rTypeInstruction(int32_t instructionEncoding, const char *instStr) {
   uint32_t funct3 = instructionEncoding & 0b11100000000000;
   uint32_t rd = instructionEncoding & 0b11111000000;
 
+  char *outputInstStr = calloc(1024, sizeof(uint8_t));
+
   int32_t instruction = funct7 << 3 | funct3;
-  char str[80];
 
   switch (instruction) {
   case 0b0000000000:
-    strcat(str, "add   ");
+    strcat(outputInstStr, "add   ");
     break;
   case 0b0100000000:
-    strcat(str, "sub   ");
+    strcat(outputInstStr, "sub   ");
     break;
   case 0b0000000001:
-    strcat(str, "sll   ");
+    strcat(outputInstStr, "sll   ");
     break;
   case 0b0000000010:
-    strcat(str, "slt   ");
+    strcat(outputInstStr, "slt   ");
     break;
   case 0b0000000011:
-    strcat(str, "sltu  ");
+    strcat(outputInstStr, "sltu  ");
     break;
   case 0b0000000100:
-    strcat(str, "xor   ");
+    strcat(outputInstStr, "xor   ");
     break;
   case 0b0000000101:
-    strcat(str, "srl   ");
+    strcat(outputInstStr, "srl   ");
     break;
   case 0b0100000101:
-    strcat(str, "sra   ");
+    strcat(outputInstStr, "sra   ");
     break;
   case 0b0000000110:
-    strcat(str, "or    ");
+    strcat(outputInstStr, "or    ");
     break;
   case 0b0000000111:
-    strcat(str, "and   ");
+    strcat(outputInstStr, "and   ");
     break;
 
   default:
     fprintf(stderr, "Invalid instruction %u:\n", instruction);
     abort();
   }
-  strcat(str, registerAbiName[rd]);
-  strcat(str, ",");
-  strcat(str, registerAbiName[rs2]);
-  strcat(str, ",");
-  strcat(str, registerAbiName[rs1]);
-  instStr = str;
+  strcat(outputInstStr, registerAbiName[rd]);
+  strcat(outputInstStr, ",");
+  strcat(outputInstStr, registerAbiName[rs2]);
+  strcat(outputInstStr, ",");
+  strcat(outputInstStr, registerAbiName[rs1]);
+
+  instStr = outputInstStr;
 }
 
 static const char *iTypeInstruction(int32_t opcode,
                                     int32_t instructionEncoding) {
-  char *str = calloc(80, sizeof(uint8_t));
   char str_imm11_0[3];
+  char *outputInstStr = calloc(1024, sizeof(uint8_t));
 
   int32_t imm11_0 = instructionEncoding >> 20;
   uint32_t rs1 = (instructionEncoding >> 15) & 0b11111;
@@ -103,30 +105,30 @@ static const char *iTypeInstruction(int32_t opcode,
 
   if (opcode == 0b1100111LL) {
     jalrFlag = 1;
-    strcat(str, "jalr  ");
+    strcat(outputInstStr, "jalr  ");
   }
 
   if (opcode == 0b0000011LL) {
     uint32_t instruction = funct3;
     switch (instruction) {
     case 0b000:
-      strcat(str, "lb ");
+      strcat(outputInstStr, "lb ");
       break;
     case 0b001:
-      strcat(str, "lh    ");
+      strcat(outputInstStr, "lh    ");
       break;
     case 0b010:
-      strcat(str, "lw    ");
+      strcat(outputInstStr, "lw    ");
       break;
     case 0b100:
-      strcat(str, "lbu   ");
+      strcat(outputInstStr, "lbu   ");
       break;
     case 0b101:
-      strcat(str, "lhu   ");
+      strcat(outputInstStr, "lhu   ");
       break;
       /*rv64I*/
     case 0b011:
-      strcat(str, "ld    ");
+      strcat(outputInstStr, "ld    ");
       break;
     default:
       fprintf(stderr, "Invalid instruction %u:\n", instruction);
@@ -138,32 +140,32 @@ static const char *iTypeInstruction(int32_t opcode,
     uint32_t instruction = funct3;
     switch (instruction) {
     case 0b000:
-      strcat(str, "addi  ");
+      strcat(outputInstStr, "addi  ");
       break;
     case 0b010:
-      strcat(str, "slti  ");
+      strcat(outputInstStr, "slti  ");
       break;
     case 0b011:
-      strcat(str, "sltiu ");
+      strcat(outputInstStr, "sltiu ");
       break;
     case 0b100:
-      strcat(str, "xori  ");
+      strcat(outputInstStr, "xori  ");
       break;
     case 0b110:
-      strcat(str, "ori   ");
+      strcat(outputInstStr, "ori   ");
       break;
     case 0b111:
-      strcat(str, "andi  ");
+      strcat(outputInstStr, "andi  ");
       break;
     case 0b001:
     case 0b101: {
       shiftFlag = 1;
       if (instruction == 0b001LL && funct7 == 0b0000000LL)
-        strcat(str, "slli ");
+        strcat(outputInstStr, "slli ");
       else if (instruction == 0b101LL && funct7 == 0b0000000LL)
-        strcat(str, "srli ");
+        strcat(outputInstStr, "srli ");
       else if (instruction == 0b101LL && funct7 == 0b0100000LL)
-        strcat(str, "srai ");
+        strcat(outputInstStr, "srai ");
       else {
         fprintf(stderr, " Invalid instruction: funct3 = %u, funct7 = %u\n",
                 funct3, funct7);
@@ -182,11 +184,11 @@ static const char *iTypeInstruction(int32_t opcode,
     switch (instruction) {
     case 0b000:
       fenceFlag1 = 1;
-      strcat(str, "fence ");
+      strcat(outputInstStr, "fence ");
       break;
     case 0b001:
       fenceFlag2 = 1;
-      strcat(str, "fence.i ");
+      strcat(outputInstStr, "fence.i ");
       break;
     default:
       fprintf(stderr, "Invalid instruction %u:\n", instruction);
@@ -200,10 +202,10 @@ static const char *iTypeInstruction(int32_t opcode,
       switch (instruction) {
 
       case 0b000000000000:
-        strcat(str, "ecall ");
+        strcat(outputInstStr, "ecall ");
         break;
       case 0b000000100000:
-        strcat(str, "ebreak ");
+        strcat(outputInstStr, "ebreak ");
         break;
       default:
         fprintf(stderr, "Invalid instruction %u:\n", instruction);
@@ -216,11 +218,11 @@ static const char *iTypeInstruction(int32_t opcode,
       case 0b010:
       case 0b011: {
         if (instruction == 0b001LL)
-          strcat(str, "csrrw ");
+          strcat(outputInstStr, "csrrw ");
         else if (instruction == 0b001LL)
-          strcat(str, "csrrs ");
+          strcat(outputInstStr, "csrrs ");
         else if (instruction == 0b001LL)
-          strcat(str, "csrrc ");
+          strcat(outputInstStr, "csrrc ");
         else {
           fprintf(stderr, "Invalid instruction %u:\n", instruction);
           abort();
@@ -233,11 +235,11 @@ static const char *iTypeInstruction(int32_t opcode,
       case 0b111: {
         csrFlag2 = 1;
         if (instruction == 0b101LL)
-          strcat(str, "csrrwi ");
+          strcat(outputInstStr, "csrrwi ");
         else if (instruction == 0b101LL)
-          strcat(str, "cssrrsi ");
+          strcat(outputInstStr, "cssrrsi ");
         else if (instruction == 0b101LL)
-          strcat(str, "csrrci ");
+          strcat(outputInstStr, "csrrci ");
         else {
           fprintf(stderr, "Invalid instruction %u:\n", instruction);
           abort();
@@ -253,66 +255,66 @@ static const char *iTypeInstruction(int32_t opcode,
   if (jalrFlag) {
     sprintf(str_imm11_0, "%d", imm11_0);
 
-    strcat(str, registerAbiName[rd]);
-    strcat(str, ",");
-    strcat(str, registerAbiName[rs1]);
-    strcat(str, ",");
-    strcat(str, str_imm11_0);
+    strcat(outputInstStr, registerAbiName[rd]);
+    strcat(outputInstStr, ",");
+    strcat(outputInstStr, registerAbiName[rs1]);
+    strcat(outputInstStr, ",");
+    strcat(outputInstStr, str_imm11_0);
   } else if (shiftFlag) {
     char *str_shamt;
     sprintf(str_shamt, "%u", shamt);
 
-    strcat(str, registerAbiName[rd]);
-    strcat(str, ",");
-    strcat(str, registerAbiName[rs1]);
-    strcat(str, ",");
-    strcat(str, str_shamt);
+    strcat(outputInstStr, registerAbiName[rd]);
+    strcat(outputInstStr, ",");
+    strcat(outputInstStr, registerAbiName[rs1]);
+    strcat(outputInstStr, ",");
+    strcat(outputInstStr, str_shamt);
   } else if (fenceFlag1) {
     char *str_pred;
     char *str_succ;
     sprintf(str_pred, "%u", pred);
     sprintf(str_succ, "%u", succ);
 
-    strcat(str, str_pred);
-    strcat(str, ",");
-    strcat(str, str_succ);
+    strcat(outputInstStr, str_pred);
+    strcat(outputInstStr, ",");
+    strcat(outputInstStr, str_succ);
   } else if (fenceFlag2) {
     ;
   } else if (csrFlag1) {
 
-    strcat(str, registerAbiName[rd]);
-    strcat(str, ",");
-    strcat(str, "csr");
-    strcat(str, ",");
-    strcat(str, registerAbiName[rs1]);
+    strcat(outputInstStr, registerAbiName[rd]);
+    strcat(outputInstStr, ",");
+    strcat(outputInstStr, "csr");
+    strcat(outputInstStr, ",");
+    strcat(outputInstStr, registerAbiName[rs1]);
   } else if (csrFlag2) {
     char *str_zimm4_0;
     sprintf(str_zimm4_0, "%u", zimm4_0);
 
-    strcat(str, registerAbiName[rd]);
-    strcat(str, ",");
-    strcat(str, "csr");
-    strcat(str, ",");
-    strcat(str, str_zimm4_0);
+    strcat(outputInstStr, registerAbiName[rd]);
+    strcat(outputInstStr, ",");
+    strcat(outputInstStr, "csr");
+    strcat(outputInstStr, ",");
+    strcat(outputInstStr, str_zimm4_0);
   } else {
     if (imm11_0 < 0)
       sprintf(str_imm11_0, "%u", abs(imm11_0));
     else
       sprintf(str_imm11_0, "%u", imm11_0);
-    strcat(str, registerAbiName[rd]);
-    strcat(str, ",");
+    strcat(outputInstStr, registerAbiName[rd]);
+    strcat(outputInstStr, ",");
     if (imm11_0 < 0)
-      strcat(str, "-");
-    strcat(str, str_imm11_0);
-    strcat(str, "(");
-    strcat(str, registerAbiName[rs1]);
-    strcat(str, ")");
+      strcat(outputInstStr, "-");
+    strcat(outputInstStr, str_imm11_0);
+    strcat(outputInstStr, "(");
+    strcat(outputInstStr, registerAbiName[rs1]);
+    strcat(outputInstStr, ")");
   }
-  return str;
+  return outputInstStr;
 }
 
 static void sTypeInstruction(int32_t instructionEncoding, void **instStr) {
-
+  char *outputInstStr = calloc(1024, sizeof(uint8_t));
   int32_t imm4_0 = (instructionEncoding >> 7) & 0b11111;
   uint32_t funct3 = (instructionEncoding >> 12) & 0b111;
   uint32_t rs1 = (instructionEncoding >> 15) & 0b11111;
@@ -323,41 +325,39 @@ static void sTypeInstruction(int32_t instructionEncoding, void **instStr) {
 
   uint32_t instruction = funct3;
 
-  char *str = calloc(80, sizeof(uint8_t));
-
   char str_imm[6];
   sprintf(str_imm, "%d", imm);
 
   switch (instruction) {
   case 0b000:
-    strcat(str, "sb    ");
+    strcat(outputInstStr, "sb    ");
     break;
   case 0b001L:
-    strcat(str, "sh    ");
+    strcat(outputInstStr, "sh    ");
     break;
   case 0b010L:
-    strcat(str, "sw    ");
+    strcat(outputInstStr, "sw    ");
     break;
 
     /*rv64*/
   case 0b011L:
-    strcat(str, "sd    ");
+    strcat(outputInstStr, "sd    ");
     break;
   default:
     fprintf(stderr, "Invalid instruction %u:\n", instruction);
     abort();
   }
-  strcat(str, registerAbiName[rs2]);
-  strcat(str, ",");
-  strcat(str, str_imm);
-  strcat(str, "(");
-  strcat(str, registerAbiName[rs1]);
-  strcat(str, ")");
-  *instStr = str;
+  strcat(outputInstStr, registerAbiName[rs2]);
+  strcat(outputInstStr, ",");
+  strcat(outputInstStr, str_imm);
+  strcat(outputInstStr, "(");
+  strcat(outputInstStr, registerAbiName[rs1]);
+  strcat(outputInstStr, ")");
+  *instStr = outputInstStr;
 }
 
 static void bTypeInstruction(int32_t instructionEncoding, void **instStr) {
-
+  char *outputInstStr = calloc(1024, sizeof(uint8_t));
   int32_t imm12 = instructionEncoding & 0b1000000000000000000000000000000;
   int32_t imm10_5 = instructionEncoding & 0b111111000000000000000000000000;
   uint32_t rs2 = instructionEncoding & 0b111110000000000000000000;
@@ -369,7 +369,6 @@ static void bTypeInstruction(int32_t instructionEncoding, void **instStr) {
   int32_t imm = imm4_1 << 1 | imm10_5 << 5 | imm11 << 11 | imm12 << 12;
 
   uint32_t instruction = funct3;
-  char str[80];
 
   char *str_imm;
   sprintf(str_imm, "%d", imm);
@@ -378,64 +377,61 @@ static void bTypeInstruction(int32_t instructionEncoding, void **instStr) {
 
   switch (instruction) {
   case 0b000:
-    strcat(str, "beq   ");
+    strcat(outputInstStr, "beq   ");
     break;
   case 0b001:
-    strcat(str, "bne   ");
+    strcat(outputInstStr, "bne   ");
     break;
   case 0b100:
-    strcat(str, "blt   ");
+    strcat(outputInstStr, "blt   ");
     break;
   case 0b101:
-    strcat(str, "bge   ");
+    strcat(outputInstStr, "bge   ");
     break;
   case 0b110:
-    strcat(str, "bltu  ");
+    strcat(outputInstStr, "bltu  ");
     break;
   case 0b111:
-    strcat(str, "bgeu  ");
+    strcat(outputInstStr, "bgeu  ");
     break;
   default:
     fprintf(stderr, "Invalid instruction %u:\n", instruction);
     abort();
   }
 
-  strcat(str, registerAbiName[rs1]);
-  strcat(str, ",");
-  strcat(str, registerAbiName[rs2]);
-  strcat(str, ",");
-  strcat(str, str_imm);
+  strcat(outputInstStr, registerAbiName[rs1]);
+  strcat(outputInstStr, ",");
+  strcat(outputInstStr, registerAbiName[rs2]);
+  strcat(outputInstStr, ",");
+  strcat(outputInstStr, str_imm);
 
-  *instStr = str;
+  *instStr = outputInstStr;
 }
 
 static void uTypeInstruction(int32_t opcode, int32_t instructionEncoding,
                              void **instStr) {
   int32_t imm31_12 = instructionEncoding >> 12;
   uint32_t rd = (instructionEncoding >> 7) & 0b11111;
-
-  static char str[80];
-
+  char *outputInstStr = calloc(1024, sizeof(uint8_t));
   if (opcode == 0b0110111LL)
-    strcat(str, "lui   ");
+    strcat(outputInstStr, "lui   ");
   else if (opcode == 0b0010111LL)
-    strcat(str, "auipc ");
+    strcat(outputInstStr, "auipc ");
 
   char str_imm31_12[12];
 
   sprintf(str_imm31_12, "%d", abs(imm31_12));
   sprintf(str_imm31_12, "%d", abs(imm31_12));
 
-  strcat(str, registerAbiName[rd]);
-  strcat(str, ",");
+  strcat(outputInstStr, registerAbiName[rd]);
+  strcat(outputInstStr, ",");
   if (imm31_12 < 0)
-    strcat(str, "-");
-  strcat(str, str_imm31_12);
-  *instStr = str;
+    strcat(outputInstStr, "-");
+  strcat(outputInstStr, str_imm31_12);
+  *instStr = outputInstStr;
 }
 
 static void jTypeInstruction(int32_t instructionEncoding, void **instStr) {
-
   int32_t imm20 = instructionEncoding & 0b10000000000000000000000000000000;
   int32_t imm10_1 = instructionEncoding & 0b111111111100000000000000000000;
   int32_t imm11 = instructionEncoding & 0b10000000000000000000;
@@ -443,15 +439,14 @@ static void jTypeInstruction(int32_t instructionEncoding, void **instStr) {
   uint32_t rd = instructionEncoding & 0b11111000000;
 
   int32_t imm = imm10_1 << 1 | imm11 << 11 | imm19_12 << 12 | imm20 << 20;
-  static char str[80];
-
+  char *outputInstStr = calloc(1024, sizeof(uint8_t));
   char *str_imm;
   sprintf(str_imm, "%d", imm);
 
-  strcat(str, registerAbiName[rd]);
-  strcat(str, ",");
-  strcat(str, str_imm);
-  *instStr = str;
+  strcat(outputInstStr, registerAbiName[rd]);
+  strcat(outputInstStr, ",");
+  strcat(outputInstStr, str_imm);
+  *instStr = outputInstStr;
 }
 
 static void decode(int32_t instructionEncoding, unsigned char C) {
