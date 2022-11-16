@@ -23,13 +23,13 @@ static const uint8_t *registerAbiName[32] = {
     "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
     "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"};
 
-static void rTypeInstruction(int32_t instructionEncoding,
-                             const uint8_t *instStr) {
-  int32_t funct7 = instructionEncoding & 0b1111111000000000000000000000000;
-  uint32_t rs2 = instructionEncoding & 0b111110000000000000000000;
-  uint32_t rs1 = instructionEncoding & 0b1111100000000000000;
-  uint32_t funct3 = instructionEncoding & 0b11100000000000;
-  uint32_t rd = instructionEncoding & 0b11111000000;
+static void rTypeInst(uint32_t instNoOpcode, uint8_t opcode,
+                      const uint8_t **instStr) {
+  int32_t funct7 = instNoOpcode & 0b1111111000000000000000000000000;
+  uint32_t rs2 = instNoOpcode & 0b111110000000000000000000;
+  uint32_t rs1 = instNoOpcode & 0b1111100000000000000;
+  uint32_t funct3 = instNoOpcode & 0b11100000000000;
+  uint32_t rd = instNoOpcode & 0b11111000000;
 
   uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
 
@@ -77,17 +77,18 @@ static void rTypeInstruction(int32_t instructionEncoding,
   strcat(outputInstStr, ",");
   strcat(outputInstStr, registerAbiName[rs1]);
 
-  instStr = outputInstStr;
+  *instStr = outputInstStr;
 }
 
-static const uint8_t *iTypeInstruction(uint8_t opcode, uint32_t instruction) {
+static const uint8_t *iTypeInst(uint32_t instNoOpcode, uint8_t opcode,
+                                const uint8_t **instStr) {
   uint8_t str_imm11_0[3];
   uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
 
-  int32_t imm11_0 = instruction >> 20;
-  uint32_t rs1 = (instruction >> 15) & 0b11111;
-  uint32_t funct3 = (instruction >> 12) & 0b111;
-  uint32_t rd = (instruction >> 7) & 0b11111;
+  int32_t imm11_0 = instNoOpcode >> 20;
+  uint32_t rs1 = (instNoOpcode >> 15) & 0b11111;
+  uint32_t funct3 = (instNoOpcode >> 12) & 0b111;
+  uint32_t rd = (instNoOpcode >> 7) & 0b11111;
 
   int32_t jalrFlag = 0;
 
@@ -172,7 +173,7 @@ static const uint8_t *iTypeInstruction(uint8_t opcode, uint32_t instruction) {
       }
     } break;
     default:
-      fprintf(stderr, "Invalid instruction %u:\n", instruction);
+      fprintf(stderr, "Invalid instruction %u:\n", instNoOpcode);
       abort();
     }
   }
@@ -307,13 +308,14 @@ static const uint8_t *iTypeInstruction(uint8_t opcode, uint32_t instruction) {
   return outputInstStr;
 }
 
-static void sTypeInstruction(uint32_t instruction, void **instStr) {
+static void sTypeInst(uint32_t instNoOpcode, uint8_t opcode,
+                      const uint8_t **instStr) {
   uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-  int32_t imm4_0 = (instruction >> 7) & 0b11111;
-  uint32_t funct3 = (instruction >> 12) & 0b111;
-  uint32_t rs1 = (instruction >> 15) & 0b11111;
-  uint32_t rs2 = (instruction >> 20) & 0b11111;
-  int32_t imm11_5 = (instruction >> 25);
+  int32_t imm4_0 = (instNoOpcode >> 7) & 0b11111;
+  uint32_t funct3 = (instNoOpcode >> 12) & 0b111;
+  uint32_t rs1 = (instNoOpcode >> 15) & 0b11111;
+  uint32_t rs2 = (instNoOpcode >> 20) & 0b11111;
+  int32_t imm11_5 = (instNoOpcode >> 25);
 
   int32_t imm = imm11_5 << 5 | imm4_0;
 
@@ -336,7 +338,7 @@ static void sTypeInstruction(uint32_t instruction, void **instStr) {
     strcat(outputInstStr, "sd    ");
     break;
   default:
-    fprintf(stderr, "Invalid instruction %u:\n", instruction);
+    fprintf(stderr, "Invalid instruction %u:\n", instNoOpcode);
     abort();
   }
   strcat(outputInstStr, registerAbiName[rs2]);
@@ -348,15 +350,16 @@ static void sTypeInstruction(uint32_t instruction, void **instStr) {
   *instStr = outputInstStr;
 }
 
-static void bTypeInstruction(uint32_t instruction, void **instStr) {
+static void bTypeInst(uint32_t instNoOpcode, uint8_t opcode,
+                      const uint8_t **instStr) {
   uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-  int32_t imm12 = instruction & 0b1000000000000000000000000000000;
-  int32_t imm10_5 = instruction & 0b111111000000000000000000000000;
-  uint32_t rs2 = instruction & 0b111110000000000000000000;
-  uint32_t rs1 = instruction & 0b1111100000000000000;
-  uint32_t funct3 = instruction & 0b11100000000000;
-  int32_t imm4_1 = instruction & 0b11110000000;
-  int32_t imm11 = instruction & 0b1000000;
+  int32_t imm12 = instNoOpcode & 0b1000000000000000000000000000000;
+  int32_t imm10_5 = instNoOpcode & 0b111111000000000000000000000000;
+  uint32_t rs2 = instNoOpcode & 0b111110000000000000000000;
+  uint32_t rs1 = instNoOpcode & 0b1111100000000000000;
+  uint32_t funct3 = instNoOpcode & 0b11100000000000;
+  int32_t imm4_1 = instNoOpcode & 0b11110000000;
+  int32_t imm11 = instNoOpcode & 0b1000000;
 
   int32_t imm = imm4_1 << 1 | imm10_5 << 5 | imm11 << 11 | imm12 << 12;
 
@@ -385,7 +388,7 @@ static void bTypeInstruction(uint32_t instruction, void **instStr) {
     strcat(outputInstStr, "bgeu  ");
     break;
   default:
-    fprintf(stderr, "Invalid instruction %u:\n", instruction);
+    fprintf(stderr, "Invalid instruction %u:\n", instNoOpcode);
     abort();
   }
 
@@ -398,10 +401,10 @@ static void bTypeInstruction(uint32_t instruction, void **instStr) {
   *instStr = outputInstStr;
 }
 
-static void uTypeInstruction(uint8_t opcode, uint32_t instruction,
-                             void **instStr) {
-  int32_t imm31_12 = instruction >> 12;
-  uint32_t rd = (instruction >> 7) & 0b11111;
+static void uTypeInst(uint32_t instNoOpcode, uint8_t opcode,
+                      const uint8_t **instStr) {
+  int32_t imm31_12 = instNoOpcode >> 12;
+  uint32_t rd = (instNoOpcode >> 7) & 0b11111;
   uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
   if (opcode == 0b0110111LL)
     strcat(outputInstStr, "lui   ");
@@ -421,12 +424,13 @@ static void uTypeInstruction(uint8_t opcode, uint32_t instruction,
   *instStr = outputInstStr;
 }
 
-static void jTypeInstruction(uint32_t instruction, void **instStr) {
-  int32_t imm20 = instruction & 0b10000000000000000000000000000000;
-  int32_t imm10_1 = instruction & 0b111111111100000000000000000000;
-  int32_t imm11 = instruction & 0b10000000000000000000;
-  int32_t imm19_12 = instruction & 0b1111111100000000000;
-  uint32_t rd = instruction & 0b11111000000;
+static void jTypeInst(uint32_t instNoOpcode, uint8_t opcode,
+                      const uint8_t **instStr) {
+  int32_t imm20 = instNoOpcode & 0b10000000000000000000000000000000;
+  int32_t imm10_1 = instNoOpcode & 0b111111111100000000000000000000;
+  int32_t imm11 = instNoOpcode & 0b10000000000000000000;
+  int32_t imm19_12 = instNoOpcode & 0b1111111100000000000;
+  uint32_t rd = instNoOpcode & 0b11111000000;
 
   int32_t imm = imm10_1 << 1 | imm11 << 11 | imm19_12 << 12 | imm20 << 20;
   uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
@@ -444,9 +448,10 @@ static void decode(uint32_t instruction, bool isUncompressionInst) {
 
   if (isUncompressionInst) {
     uint8_t opcode = instruction & 0b1111111;
+    uint32_t instNoOpcode = instruction >> 7;
     switch (opcode) {
     case 0b0110011: // R
-      rTypeInstruction(instruction, instStr);
+      rTypeInst(instNoOpcode, opcode, &instStr);
       break;
 
     case 0b1100111: // I Type
@@ -454,24 +459,24 @@ static void decode(uint32_t instruction, bool isUncompressionInst) {
     case 0b0010011:
     case 0b0001111:
     case 0b1110011:
-      instStr = iTypeInstruction(opcode, instruction);
+      iTypeInst(instNoOpcode, opcode, &instStr);
       break;
 
     case 0b0100011: // S Type
-      sTypeInstruction(instruction, (void **)&instStr);
+      sTypeInst(instNoOpcode, opcode, &instStr);
       break;
 
     case 0b1100011: // B Type
-      bTypeInstruction(instruction, (void **)&instStr);
+      bTypeInst(instNoOpcode, opcode, &instStr);
       break;
 
     case 0b0110111: // U Type
     case 0b0010111:
-      uTypeInstruction(opcode, instruction, (void **)&instStr);
+      uTypeInst(instNoOpcode, opcode, &instStr);
       break;
 
     case 0b1101111: // J Type
-      jTypeInstruction(instruction, (void **)&instStr);
+      jTypeInst(instNoOpcode, opcode, &instStr);
       break;
 
     default:
