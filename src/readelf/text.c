@@ -18,7 +18,7 @@ static uint8_t uncompressionInstLen = 4;
 
 static uint32_t instIndex = 0;
 
-uint8_t strImm[20];
+uint8_t immStr[20];
 
 static const uint8_t *registerAbiName[32] = {
     "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
@@ -96,7 +96,7 @@ static const uint8_t *iTypeJalrInst(int32_t instNoOpcode, uint8_t opcode) {
   strcat(outputInstStr, ",");
   if (imm31_12 < 0)
     strcat(outputInstStr, "-");
-  sprintf(strImm, "%u", abs(imm31_12));
+  sprintf(immStr, "%u", abs(imm31_12));
   strcat(outputInstStr, "(");
   strcat(outputInstStr, registerAbiName[rs1]);
   strcat(outputInstStr, ")");
@@ -144,7 +144,7 @@ static const uint8_t *iTypeLbInst(int32_t instNoOpcode, uint8_t opcode) {
   strcat(outputInstStr, ",");
   if (imm11_0 < 0)
     strcat(outputInstStr, "-");
-  sprintf(strImm, "%u", abs(imm11_0));
+  sprintf(immStr, "%u", abs(imm11_0));
   strcat(outputInstStr, "(");
   strcat(outputInstStr, registerAbiName[rs1]);
   strcat(outputInstStr, ")");
@@ -212,8 +212,8 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
   strcat(outputInstStr, registerAbiName[rs1]);
   if (outputNum < 0)
     strcat(outputInstStr, "-");
-  sprintf(strImm, "%u", abs(outputNum));
-  strcat(outputInstStr, strImm);
+  sprintf(immStr, "%u", abs(outputNum));
+  strcat(outputInstStr, immStr);
 
   return outputInstStr;
 }
@@ -243,9 +243,9 @@ static const uint8_t *iTypeFenceInst(int32_t instNoOpcode, uint8_t opcode) {
   }
 
   if (fence) {
-    sprintf(strImm, "%u", pred);
+    sprintf(immStr, "%u", pred);
     strcat(outputInstStr, ",");
-    sprintf(strImm, "%u", succ);
+    sprintf(immStr, "%u", succ);
   }
 
   return outputInstStr;
@@ -294,7 +294,7 @@ static const uint8_t *iTypeEcallInst(int32_t instNoOpcode, uint8_t opcode) {
       }
       strcat(outputInstStr, registerAbiName[rd]);
       strcat(outputInstStr, ",");
-      sprintf(strImm, "%u", csr);
+      sprintf(immStr, "%u", csr);
       strcat(outputInstStr, ",");
       strcat(outputInstStr, registerAbiName[rs1]);
       break;
@@ -317,11 +317,11 @@ static const uint8_t *iTypeEcallInst(int32_t instNoOpcode, uint8_t opcode) {
       }
       strcat(outputInstStr, registerAbiName[rd]);
       strcat(outputInstStr, ",");
-      sprintf(strImm, "%u", csr);
+      sprintf(immStr, "%u", csr);
       strcat(outputInstStr, ",");
       if (zimm < 0)
         strcat(outputInstStr, "-");
-      sprintf(strImm, "%u", abs(zimm));
+      sprintf(immStr, "%u", abs(zimm));
       break;
 
     default:
@@ -346,7 +346,7 @@ static const uint8_t *sTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 
   int32_t imm12 = imm11_5 << 5 | imm4_0;
 
-  sprintf(strImm, "%u", abs(imm12));
+  sprintf(immStr, "%u", abs(imm12));
 
   switch (funct3) {
   case 0b000:
@@ -372,7 +372,7 @@ static const uint8_t *sTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   strcat(outputInstStr, ",");
   if (imm12 < 0)
     strcat(outputInstStr, "-");
-  strcat(outputInstStr, strImm);
+  strcat(outputInstStr, immStr);
   strcat(outputInstStr, "(");
   strcat(outputInstStr, registerAbiName[rs1]);
   strcat(outputInstStr, ")");
@@ -395,7 +395,7 @@ static const uint8_t *bTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 
   int32_t imm12 = imm12_12 << 12 | imm11_11 << 11 | imm10_5 << 5 | imm4_1 << 1;
 
-  sprintf(strImm, "%u", abs(imm12));
+  sprintf(immStr, "%u", abs(imm12));
 
   switch (funct3) {
   case 0b000:
@@ -428,7 +428,7 @@ static const uint8_t *bTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   strcat(outputInstStr, ",");
   if (imm12 < 0)
     strcat(outputInstStr, "-");
-  strcat(outputInstStr, strImm);
+  strcat(outputInstStr, immStr);
 
   return outputInstStr;
 }
@@ -449,14 +449,14 @@ static const uint8_t *uTypeInst(int32_t instNoOpcode, uint8_t opcode) {
     abort();
   }
 
-  sprintf(strImm, "%u", abs(imm31_12));
-  sprintf(strImm, "%u", abs(imm31_12));
+  sprintf(immStr, "%u", abs(imm31_12));
+  sprintf(immStr, "%u", abs(imm31_12));
 
   strcat(outputInstStr, registerAbiName[rd]);
   strcat(outputInstStr, ",");
   if (imm31_12 < 0)
     strcat(outputInstStr, "-");
-  strcat(outputInstStr, strImm);
+  strcat(outputInstStr, immStr);
 
   return outputInstStr;
 }
@@ -474,13 +474,13 @@ static const uint8_t *jTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   int32_t imm20 =
       imm20_20 << 20 | imm19_12 << 12 | imm11_11 << 11 | imm10_1 << 1;
 
-  sprintf(strImm, "%u", abs(imm20));
+  sprintf(immStr, "%u", abs(imm20));
 
   strcat(outputInstStr, registerAbiName[rd]);
   strcat(outputInstStr, ",");
   if (imm20 < 0)
     strcat(outputInstStr, "-");
-  strcat(outputInstStr, strImm);
+  strcat(outputInstStr, immStr);
 
   return outputInstStr;
 }
