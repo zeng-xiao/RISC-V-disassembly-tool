@@ -16,7 +16,7 @@ extern uint64_t shdrTextSize;
 static uint8_t compressionInstLen = 2;
 static uint8_t uncompressionInstLen = 4;
 
-static uint32_t instructionIndex = 0;
+static uint32_t instIndex = 0;
 
 uint8_t strImm[20];
 
@@ -537,13 +537,12 @@ static void decode(int32_t instruction, bool isUncompressionInst) {
   } else {
   }
 
-  fprintf(stderr, "%04x:     %08x    %s\n", instructionIndex, instruction,
-          instStr);
+  fprintf(stderr, "%04x:     %08x    %s\n", instIndex, instruction, instStr);
 
   if (isUncompressionInst)
-    instructionIndex += uncompressionInstLen;
+    instIndex += uncompressionInstLen;
   else
-    instructionIndex += compressionInstLen;
+    instIndex += compressionInstLen;
 }
 
 int disassembleText(const uint8_t *inputFileName) {
