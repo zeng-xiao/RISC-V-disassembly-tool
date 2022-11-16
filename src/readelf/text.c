@@ -161,11 +161,11 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
   uint8_t funct7 = instNoOpcode >> 18;
 
-  uint8_t shamt = (instNoOpcode >> 13) & 0b111111;
-
   int32_t imm11_0 = instNoOpcode >> 13;
 
   int32_t outputNum = imm11_0;
+   
+  uint8_t shamt;
 
   switch (funct3) {
   case 0b000:
@@ -199,6 +199,7 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
               instNoOpcode << 7 | opcode);
       abort();
     }
+    shamt = (instNoOpcode >> 13) & 0b111111;
     outputNum = shamt;
     break;
   default:
@@ -341,8 +342,8 @@ static const uint8_t *sTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
   uint8_t rs2 = (instNoOpcode >> 13) & 0b11111;
 
-  int32_t imm4_0 = instNoOpcode & 0b11111;
   int32_t imm11_5 = instNoOpcode >> 18;
+  int32_t imm4_0 = instNoOpcode & 0b11111;
 
   int32_t imm12 = imm11_5 << 5 | imm4_0;
 
@@ -389,9 +390,9 @@ static const uint8_t *bTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t rs2 = (instNoOpcode >> 13) & 0b11111;
 
   int32_t imm12_12 = (instNoOpcode >> 31) & 0b1;
+  int32_t imm11_11 = instNoOpcode & 0b1;
   int32_t imm10_5 = (instNoOpcode >> 25) & 0b111111;
   int32_t imm4_1 = (instNoOpcode >> 1) & 0b1111;
-  int32_t imm11_11 = instNoOpcode & 0b1;
 
   int32_t imm12 = imm12_12 << 12 | imm11_11 << 11 | imm10_5 << 5 | imm4_1 << 1;
 
@@ -436,8 +437,10 @@ static const uint8_t *bTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 static const uint8_t *uTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
 
-  int32_t imm31_12 = instNoOpcode >> 5;
   uint8_t rd = instNoOpcode & 0b11111;
+
+  int32_t imm31_12 = instNoOpcode >> 5;
+  sprintf(immStr, "%u", abs(imm31_12));
 
   if (opcode == 0b0110111)
     strcat(outputInstStr, "lui   ");
@@ -448,9 +451,6 @@ static const uint8_t *uTypeInst(int32_t instNoOpcode, uint8_t opcode) {
             instNoOpcode << 7 | opcode);
     abort();
   }
-
-  sprintf(immStr, "%u", abs(imm31_12));
-  sprintf(immStr, "%u", abs(imm31_12));
 
   strcat(outputInstStr, registerAbiName[rd]);
   strcat(outputInstStr, ",");
@@ -464,16 +464,15 @@ static const uint8_t *uTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 static const uint8_t *jTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
 
-  int32_t imm20_20 = (instNoOpcode >> 24) & 0b1;
-  int32_t imm10_1 = (instNoOpcode >> 14) & 0b1111111111;
-  int32_t imm11_11 = (instNoOpcode >> 13) & 0b1;
-  int32_t imm19_12 = (instNoOpcode >> 5) & 0b11111111;
-
   uint8_t rd = instNoOpcode & 0b11111;
+
+  int32_t imm20_20 = (instNoOpcode >> 24) & 0b1;
+  int32_t imm19_12 = (instNoOpcode >> 5) & 0b11111111;
+  int32_t imm11_11 = (instNoOpcode >> 13) & 0b1;
+  int32_t imm10_1 = (instNoOpcode >> 14) & 0b1111111111;
 
   int32_t imm20 =
       imm20_20 << 20 | imm19_12 << 12 | imm11_11 << 11 | imm10_1 << 1;
-
   sprintf(immStr, "%u", abs(imm20));
 
   strcat(outputInstStr, registerAbiName[rd]);
@@ -491,6 +490,7 @@ static void decode(int32_t instruction, bool isUncompressionInst) {
   if (isUncompressionInst) {
     uint8_t opcode = instruction & 0b1111111;
     int32_t instNoOpcode = instruction >> 7;
+
     switch (opcode) {
     case 0b0110011: // R Type
       instStr = rTypeInst(instNoOpcode, opcode);
