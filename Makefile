@@ -20,6 +20,7 @@ $(BINPATH):
 
 readelf : $(TOPDIR)/src/readelf/readelf-riscv
 	$(TOPDIR)/src/readelf/readelf-riscv /home/user/code/riscv/dwarf_relocations/add.c.S.o
+	#qemu-riscv64 $(TOPDIR)/src/readelf/readelf-riscv /home/user/code/riscv/dwarf_relocations/add.c.S.o
 
 .PHONY=clean
 clean:
