@@ -18,9 +18,19 @@ static uint8_t uncompressionInstLen = 4;
 
 static uint32_t instIndex = 0;
 
-uint8_t immStr[20];
+static uint8_t immStr[20];
 
-uint8_t outputInstStr[1024] = {'\0'};
+static uint8_t outputInstStr[1024];
+
+/* .bss section */
+static uint8_t outputInstStr1[1024] = {'\0'};
+static uint8_t outputInstStr2[1024];
+uint8_t outputInstStr4[1024] = {'\0'};
+uint8_t outputInstStr5[1024];
+
+/* .data section */
+static uint8_t outputInstStr3[1024] = {'1'};
+uint8_t outputInstStr6[1024] = {'\1'};
 
 static const uint8_t *registerAbiName[32] = {
     "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",

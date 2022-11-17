@@ -11,3 +11,7 @@ build
 
 # elf
 readelf-riscv
+
+# log file
+*.txt
+*.log
