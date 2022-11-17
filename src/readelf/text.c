@@ -20,14 +20,14 @@ static uint32_t instIndex = 0;
 
 uint8_t immStr[20];
 
+uint8_t outputInstStr[1024] = {'\0'};
+
 static const uint8_t *registerAbiName[32] = {
     "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
     "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
     "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"};
 
 static const uint8_t *rTypeInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t funct7 = (instNoOpcode >> 25) & 0b1111111;
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
 
@@ -84,8 +84,6 @@ static const uint8_t *rTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *iTypeJalrInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t rd = instNoOpcode & 0b11111;
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
 
@@ -105,8 +103,6 @@ static const uint8_t *iTypeJalrInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *iTypeLbInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t rd = instNoOpcode & 0b11111;
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
 
@@ -153,8 +149,6 @@ static const uint8_t *iTypeLbInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t rd = instNoOpcode & 0b11111;
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
 
@@ -164,7 +158,7 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
   int32_t imm11_0 = instNoOpcode >> 13;
 
   int32_t outputNum = imm11_0;
-   
+
   uint8_t shamt;
 
   switch (funct3) {
@@ -220,8 +214,6 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *iTypeFenceInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
 
   uint8_t pred = (instNoOpcode >> 17) & 0b1111;
@@ -253,8 +245,6 @@ static const uint8_t *iTypeFenceInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *iTypeEcallInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
 
   if (funct3 == 0b000) {
@@ -335,8 +325,6 @@ static const uint8_t *iTypeEcallInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *sTypeInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
 
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
@@ -382,8 +370,6 @@ static const uint8_t *sTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *bTypeInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
 
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
@@ -435,8 +421,6 @@ static const uint8_t *bTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *uTypeInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t rd = instNoOpcode & 0b11111;
 
   int32_t imm31_12 = instNoOpcode >> 5;
@@ -462,8 +446,6 @@ static const uint8_t *uTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *jTypeInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t *outputInstStr = calloc(1024, sizeof(uint8_t));
-
   uint8_t rd = instNoOpcode & 0b11111;
 
   int32_t imm20_20 = (instNoOpcode >> 24) & 0b1;
@@ -543,6 +525,12 @@ static void decode(int32_t instruction, bool isUncompressionInst) {
     instIndex += uncompressionInstLen;
   else
     instIndex += compressionInstLen;
+
+  /* The strcat function appends a copy of the string pointed to by s2
+  (including the terminating null character) to the end of the string pointed to
+  by s1. The initial character of s2 overwrites the null character at the end of
+  s1. */
+  outputInstStr[0] = '\0';
 }
 
 int disassembleText(const uint8_t *inputFileName) {
