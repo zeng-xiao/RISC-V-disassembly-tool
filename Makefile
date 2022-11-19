@@ -18,9 +18,13 @@ $(BUILDPATH):
 $(BINPATH):
 	mkdir -p $(BINPATH)
 
-readelf : $(TOPDIR)/src/readelf/readelf-riscv
+readelf-add : $(TOPDIR)/src/readelf/readelf-riscv
 	$(TOPDIR)/src/readelf/readelf-riscv /home/user/code/riscv/dwarf_relocations/add.c.S.o
 	#qemu-riscv64 $(TOPDIR)/src/readelf/readelf-riscv /home/user/code/riscv/dwarf_relocations/add.c.S.o
+
+readelf-coremark : $(TOPDIR)/src/readelf/readelf-riscv
+	$(TOPDIR)/src/readelf/readelf-riscv /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc
+	#qemu-riscv64 $(TOPDIR)/src/readelf/readelf-riscv /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc
 
 riscvElf :
 	make CC=/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror -march=rv64gc -mabi=lp64d -static" LDFLAGS="-static"
