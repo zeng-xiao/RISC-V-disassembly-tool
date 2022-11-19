@@ -34,7 +34,7 @@ static const uint8_t *floatRegAbiName[32] = {
     "fs8", "fs9", "fs10", "fs11", "ft8", "ft9", "ft10", "ft11"};
 
 static const uint8_t *rTypeInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t funct7 = (instNoOpcode >> 25) & 0b1111111;
+  uint8_t funct7 = (instNoOpcode >> 18) & 0b1111111;
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
 
   uint8_t rd = (instNoOpcode >> 0) & 0b11111;
@@ -45,41 +45,41 @@ static const uint8_t *rTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 
   switch (funct) {
   case 0b0000000 << 7 | 0b000:
-    strcat(outputInstStr, "add   ");
+    strcat(outputInstStr, "add    ");
     break;
   case 0b0100000 << 3 | 0b000:
-    strcat(outputInstStr, "sub   ");
+    strcat(outputInstStr, "sub    ");
     break;
   case 0b0000000 << 3 | 0b001:
-    strcat(outputInstStr, "sll   ");
+    strcat(outputInstStr, "sll    ");
     break;
   case 0b0000000 << 3 | 0b010:
-    strcat(outputInstStr, "slt   ");
+    strcat(outputInstStr, "slt    ");
     break;
   case 0b0000000 << 3 | 0b011:
-    strcat(outputInstStr, "sltu  ");
+    strcat(outputInstStr, "sltu   ");
     break;
   case 0b0000000 << 3 | 0b100:
-    strcat(outputInstStr, "xor   ");
+    strcat(outputInstStr, "xor    ");
     break;
   case 0b0000000 << 3 | 0b101:
-    strcat(outputInstStr, "srl   ");
+    strcat(outputInstStr, "srl    ");
     break;
   case 0b0100000 << 3 | 0b101:
-    strcat(outputInstStr, "sra   ");
+    strcat(outputInstStr, "sra    ");
     break;
   case 0b0000000 << 3 | 0b110:
-    strcat(outputInstStr, "or    ");
+    strcat(outputInstStr, "or     ");
     break;
   case 0b0000000 << 3 | 0b111:
-    strcat(outputInstStr, "and   ");
+    strcat(outputInstStr, "and    ");
     break;
   /* rv32M */
   case 0b0000001 << 3 | 0b000:
-    strcat(outputInstStr, "mul   ");
+    strcat(outputInstStr, "mul    ");
     break;
   case 0b0000001 << 3 | 0b001:
-    strcat(outputInstStr, "mulh  ");
+    strcat(outputInstStr, "mulh   ");
     break;
   case 0b0000001 << 3 | 0b010:
     strcat(outputInstStr, "mulhsu ");
@@ -88,19 +88,19 @@ static const uint8_t *rTypeInst(int32_t instNoOpcode, uint8_t opcode) {
     strcat(outputInstStr, "mulhu ");
     break;
   case 0b0000001 << 3 | 0b100:
-    strcat(outputInstStr, "div   ");
+    strcat(outputInstStr, "div    ");
     break;
   case 0b0000001 << 3 | 0b101:
-    strcat(outputInstStr, "divu  ");
+    strcat(outputInstStr, "divu   ");
     break;
   case 0b0000001 << 3 | 0b110:
-    strcat(outputInstStr, "rem   ");
+    strcat(outputInstStr, "rem    ");
     break;
   case 0b0000001 << 3 | 0b111:
-    strcat(outputInstStr, "remu  ");
+    strcat(outputInstStr, "remu   ");
     break;
   default:
-    fprintf(stderr, "R type invalid instruction: %x\n",
+    fprintf(stderr, "[1] R type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -119,7 +119,7 @@ static const uint8_t *r4TypeInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t rd = (instNoOpcode >> 0) & 0b11111;
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
   uint8_t rs2 = (instNoOpcode >> 13) & 0b11111;
-  uint8_t rs3 = (instNoOpcode >> 20) & 0b11111;
+  uint8_t rs3 = instNoOpcode >> 20;
 
   switch (opcode) {
   case 0b1000011:
@@ -135,7 +135,7 @@ static const uint8_t *r4TypeInst(int32_t instNoOpcode, uint8_t opcode) {
     strcat(outputInstStr, "fnmadd.s ");
     break;
   default:
-    fprintf(stderr, "R4 type invalid instruction: %x\n",
+    fprintf(stderr, "[2] R4 type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -151,7 +151,7 @@ static const uint8_t *r4TypeInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *rTypeFaddsInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t funct7 = instNoOpcode >> 18;
+  uint8_t funct7 = (instNoOpcode >> 18) & 0b1111111;
   uint8_t rm = (instNoOpcode >> 5) & 0b111;
 
   uint8_t rd = (instNoOpcode >> 0) & 0b11111;
@@ -159,7 +159,6 @@ static const uint8_t *rTypeFaddsInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t rs2 = (instNoOpcode >> 13) & 0b11111;
 
   uint8_t funct5 = (instNoOpcode >> 13) & 0b11111;
-  uint16_t funct = funct7 << 5 | funct5;
 
   switch (funct7) {
   case 0b0000001:
@@ -202,65 +201,74 @@ static const uint8_t *rTypeFaddsInst(int32_t instNoOpcode, uint8_t opcode) {
     break;
   case 0b1010001:
     if (rm == 0b010)
-      strcat(outputInstStr, "feq.d ");
+      strcat(outputInstStr, "feq.d  ");
     if (rm == 0b001)
-      strcat(outputInstStr, "flt.d ");
+      strcat(outputInstStr, "flt.d  ");
     if (rm == 0b000)
-      strcat(outputInstStr, "fle.d ");
+      strcat(outputInstStr, "fle.d  ");
     break;
   case 0b1110001:
     if (rs2 << 3 | rm == 0b00000 << 3 | 0b010)
       strcat(outputInstStr, " fclass.d ");
+    else if (funct5 == 0b00000)
+      strcat(outputInstStr, "fmv.x.d "); /* rv64 R Type RV64F */
+    else {
+      fprintf(stderr, "[21] R type invalid instruction: %x\n",
+              instNoOpcode << 7 | opcode);
+      abort();
+    }
     break;
   case 0b1100001:
     if (rs2 == 0b00000)
       strcat(outputInstStr, "fcvt.w.d ");
-    if (rs2 == 0b00001)
+    else if (rs2 == 0b00001)
       strcat(outputInstStr, "fcvt.wu.d ");
+    else if (funct5 == 0b00010)
+      strcat(outputInstStr, "fcvt.l.d "); /* rv64 R Type RV64F */
+    else if (funct5 == 0b00011)
+      strcat(outputInstStr, "fcvt.lu.d "); /* rv64 R Type RV64F */
+    else {
+      fprintf(stderr, "[20] R type invalid instruction: %x\n",
+              instNoOpcode << 7 | opcode);
+      abort();
+    }
     break;
   case 0b1101001:
     if (rs2 == 0b00000)
       strcat(outputInstStr, "fcvt.d.w ");
-    if (rs2 == 0b00001)
+    else if (rs2 == 0b00001)
       strcat(outputInstStr, "fcvt.d.wu ");
-    break;
-  default: // rv64 R Type RV64F
-    switch (funct) {
-    case 0b1100000 << 7 | 0b00010:
-      strcat(outputInstStr, "fcvt.l.s  ");
-      break;
-    case 0b1100000 << 3 | 0b00011:
-      strcat(outputInstStr, "fcvt.lu.s  ");
-      break;
-    case 0b1101000 << 3 | 0b00010:
-      strcat(outputInstStr, "fcvt.s.l  ");
-      break;
-    case 0b1101000 << 3 | 0b00011:
-      strcat(outputInstStr, "fcvt.s.lu  ");
-      break;
-    case 0b1100001 << 3 | 0b00010:
-      strcat(outputInstStr, "fcvt.l.d   ");
-      break;
-    case 0b1100001 << 3 | 0b00011:
-      strcat(outputInstStr, "fcvt.lu.d  ");
-      break;
-    case 0b1110001 << 3 | 0b00000:
-      strcat(outputInstStr, "fmv.x.d  ");
-      break;
-    case 0b1101001 << 3 | 0b00010:
-      strcat(outputInstStr, "fcvt.d.l  ");
-      break;
-    case 0b1101001 << 3 | 0b00011:
-      strcat(outputInstStr, "fcvt.d.lu   ");
-      break;
-    case 0b1111001 << 3 | 0b00000:
-      strcat(outputInstStr, "fmv.d.x  ");
-      break;
-    default:
-      fprintf(stderr, "R type invalid instruction: %x\n",
+    else if (funct5 == 0b00010)
+      strcat(outputInstStr, "fcvt.d.l "); /* rv64 R Type RV64F */
+    else if (funct5 == 0b00011)
+      strcat(outputInstStr, "fcvt.d.lu "); /* rv64 R Type RV64F */
+    else {
+      fprintf(stderr, "[19] R type invalid instruction: %x\n",
               instNoOpcode << 7 | opcode);
       abort();
     }
+    break;
+    /* rv64 R Type RV64F */
+  case 0b1100000:
+    if (funct5 == 0b00010)
+      strcat(outputInstStr, "fcvt.l.s ");
+    if (funct5 == 0b00011)
+      strcat(outputInstStr, "fcvt.lu.s ");
+    break;
+  case 0b1101000:
+    if (funct5 == 0b00010)
+      strcat(outputInstStr, "fcvt.s.l ");
+    if (funct5 == 0b00011)
+      strcat(outputInstStr, "fcvt.s.lu ");
+    break;
+  case 0b1111001:
+    if (funct5 == 0b00000)
+      strcat(outputInstStr, "fmv.d.x ");
+    break;
+  default:
+    fprintf(stderr, "[3] R type invalid instruction: %x\n",
+            instNoOpcode << 7 | opcode);
+    abort();
   }
   strcat(outputInstStr, intRegAbiName[rd]);
   strcat(outputInstStr, ",");
@@ -272,7 +280,7 @@ static const uint8_t *rTypeFaddsInst(int32_t instNoOpcode, uint8_t opcode) {
 }
 
 static const uint8_t *rv64rTypeInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t funct7 = (instNoOpcode >> 25) & 0b1111111;
+  uint8_t funct7 = (instNoOpcode >> 18) & 0b1111111;
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
 
   uint8_t rd = (instNoOpcode >> 0) & 0b11111;
@@ -282,57 +290,57 @@ static const uint8_t *rv64rTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   uint16_t funct = funct7 << 3 | funct3;
 
   switch (funct) {
-  case 0b0000000 << 7 | 0b000:
-    strcat(outputInstStr, "addw  ");
+  case 0b0000000 << 3 | 0b000:
+    strcat(outputInstStr, "addw   ");
     break;
   case 0b0100000 << 3 | 0b000:
-    strcat(outputInstStr, "subw  ");
+    strcat(outputInstStr, "subw   ");
     break;
   case 0b0000000 << 3 | 0b001:
-    strcat(outputInstStr, "sllw  ");
+    strcat(outputInstStr, "sllw   ");
     break;
   case 0b0000000 << 3 | 0b101:
-    strcat(outputInstStr, "srlw  ");
+    strcat(outputInstStr, "srlw   ");
     break;
   case 0b0100000 << 3 | 0b101:
-    strcat(outputInstStr, "sraw   ");
+    strcat(outputInstStr, "sraw    ");
     break;
     /* rv64M */
   case 0b0000001 << 3 | 0b000:
-    strcat(outputInstStr, "mulw  ");
+    strcat(outputInstStr, "mulw   ");
     break;
   case 0b0000001 << 3 | 0b100:
-    strcat(outputInstStr, "divw  ");
+    strcat(outputInstStr, "divw   ");
     break;
   case 0b0000001 << 3 | 0b101:
-    strcat(outputInstStr, "divuw  ");
+    strcat(outputInstStr, "divuw   ");
     break;
   case 0b0000001 << 3 | 0b110:
-    strcat(outputInstStr, "remw   ");
+    strcat(outputInstStr, "remw    ");
     break;
   case 0b0000001 << 3 | 0b111:
-    strcat(outputInstStr, "remuw  ");
+    strcat(outputInstStr, "remuw   ");
     break;
   default:
-    fprintf(stderr, "rv64R type invalid instruction: %x\n",
+    fprintf(stderr, "[4] rv64R type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
   strcat(outputInstStr, intRegAbiName[rd]);
   strcat(outputInstStr, ",");
-  strcat(outputInstStr, intRegAbiName[rs2]);
-  strcat(outputInstStr, ",");
   strcat(outputInstStr, intRegAbiName[rs1]);
+  strcat(outputInstStr, ",");
+  strcat(outputInstStr, intRegAbiName[rs2]);
 
   return outputInstStr;
 }
 
 static const uint8_t *rv64rTypeAInst(int32_t instNoOpcode, uint8_t opcode) {
-  uint8_t funct5 = (instNoOpcode >> 27) & 0b11111;
+  uint8_t funct5 = instNoOpcode >> 20;
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
 
-  uint8_t aq = (instNoOpcode >> 25) & 0b1;
-  uint8_t rl = (instNoOpcode >> 26) & 0b1;
+  uint8_t aq = (instNoOpcode >> 19) & 0b1;
+  uint8_t rl = (instNoOpcode >> 18) & 0b1;
 
   uint8_t rd = (instNoOpcode >> 0) & 0b11111;
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
@@ -344,40 +352,40 @@ static const uint8_t *rv64rTypeAInst(int32_t instNoOpcode, uint8_t opcode) {
   switch (funct) {
   case 0b00010 << 7 | 0b011:
     lrd = true;
-    strcat(outputInstStr, "lr.d  ");
+    strcat(outputInstStr, "lr.d   ");
     break;
   case 0b00011 << 3 | 0b011:
-    strcat(outputInstStr, "sc.d  ");
+    strcat(outputInstStr, "sc.d   ");
     break;
   case 0b00001 << 3 | 0b011:
-    strcat(outputInstStr, "amoswap.d  ");
+    strcat(outputInstStr, "amoswap.d ");
     break;
   case 0b00000 << 3 | 0b011:
-    strcat(outputInstStr, "amoadd.d  ");
+    strcat(outputInstStr, "amoadd.d ");
     break;
   case 0b00100 << 3 | 0b011:
-    strcat(outputInstStr, "amoxor.d   ");
+    strcat(outputInstStr, "amoxor.d ");
     break;
   case 0b01100 << 3 | 0b011:
-    strcat(outputInstStr, "amoand.d  ");
+    strcat(outputInstStr, "amoand.d ");
     break;
   case 0b01000 << 3 | 0b011:
-    strcat(outputInstStr, "amoor.d  ");
+    strcat(outputInstStr, "amoor.d ");
     break;
   case 0b10000 << 3 | 0b011:
-    strcat(outputInstStr, "amomin.d  ");
+    strcat(outputInstStr, "amomin.d ");
     break;
   case 0b10100 << 3 | 0b011:
-    strcat(outputInstStr, "amomax.d   ");
+    strcat(outputInstStr, "amomax.d ");
     break;
   case 0b11000 << 3 | 0b011:
-    strcat(outputInstStr, "amominu.d  ");
+    strcat(outputInstStr, "amominu.d ");
     break;
   case 0b11100 << 3 | 0b011:
-    strcat(outputInstStr, "amomaxu.d  ");
+    strcat(outputInstStr, "amomaxu.d ");
     break;
   default:
-    fprintf(stderr, "rv64R atomic type invalid instruction: %x\n",
+    fprintf(stderr, "[5] rv64R atomic type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -405,7 +413,7 @@ static const uint8_t *rv64iTypeFlwInst(int32_t instNoOpcode, uint8_t opcode) {
   uint16_t imm11_0 = instNoOpcode >> 13;
   sprintf(immStr, "%u", abs(imm11_0));
 
-  strcat(outputInstStr, "flw  ");
+  strcat(outputInstStr, "flw   ");
   strcat(outputInstStr, floatRegAbiName[rd]);
   strcat(outputInstStr, ",");
   if (imm11_0 < 0)
@@ -424,7 +432,7 @@ static const uint8_t *iTypeJalrInst(int32_t instNoOpcode, uint8_t opcode) {
 
   int32_t imm31_12 = instNoOpcode >> 13;
 
-  strcat(outputInstStr, "jalr  ");
+  strcat(outputInstStr, "jalr   ");
   strcat(outputInstStr, intRegAbiName[rd]);
   strcat(outputInstStr, ",");
   if (imm31_12 < 0)
@@ -448,26 +456,29 @@ static const uint8_t *iTypeLbInst(int32_t instNoOpcode, uint8_t opcode) {
 
   switch (funct3) {
   case 0b000:
-    strcat(outputInstStr, "lb    ");
+    strcat(outputInstStr, "lb     ");
     break;
   case 0b001:
-    strcat(outputInstStr, "lh    ");
+    strcat(outputInstStr, "lh     ");
     break;
   case 0b010:
-    strcat(outputInstStr, "lw    ");
+    strcat(outputInstStr, "lw     ");
     break;
   case 0b100:
-    strcat(outputInstStr, "lbu   ");
+    strcat(outputInstStr, "lbu    ");
     break;
   case 0b101:
-    strcat(outputInstStr, "lhu   ");
+    strcat(outputInstStr, "lhu    ");
     break;
     /*rv64I*/
   case 0b011:
-    strcat(outputInstStr, "ld    ");
+    strcat(outputInstStr, "ld     ");
+    break;
+  case 0b110:
+    strcat(outputInstStr, "lwu    ");
     break;
   default:
-    fprintf(stderr, "I type invalid instruction: %x\n",
+    fprintf(stderr, "[6] I type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -490,7 +501,7 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
 
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
-  uint8_t funct7 = instNoOpcode >> 18;
+  uint8_t funct7 = (instNoOpcode >> 19) & 0b1111111;
 
   int32_t imm11_0 = instNoOpcode >> 13;
 
@@ -500,33 +511,33 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
 
   switch (funct3) {
   case 0b000:
-    strcat(outputInstStr, "addi  ");
+    strcat(outputInstStr, "addi   ");
     break;
   case 0b010:
-    strcat(outputInstStr, "slti  ");
+    strcat(outputInstStr, "slti   ");
     break;
   case 0b011:
-    strcat(outputInstStr, "sltiu ");
+    strcat(outputInstStr, "sltiu  ");
     break;
   case 0b100:
-    strcat(outputInstStr, "xori  ");
+    strcat(outputInstStr, "xori   ");
     break;
   case 0b110:
-    strcat(outputInstStr, "ori   ");
+    strcat(outputInstStr, "ori    ");
     break;
   case 0b111:
-    strcat(outputInstStr, "andi  ");
+    strcat(outputInstStr, "andi   ");
     break;
   case 0b001:
   case 0b101:
-    if (funct3 == 0b001 && funct7 == 0b0000000)
-      strcat(outputInstStr, "slli  ");
-    else if (funct3 == 0b101 && funct7 == 0b0000000)
-      strcat(outputInstStr, "srli  ");
-    else if (funct3 == 0b101 && funct7 == 0b0100000)
-      strcat(outputInstStr, "srai  ");
+    if (funct3 == 0b001 && funct7 == 0b000000)
+      strcat(outputInstStr, "slli   ");
+    else if (funct3 == 0b101 && funct7 == 0b000000)
+      strcat(outputInstStr, "srli   ");
+    else if (funct3 == 0b101 && funct7 == 0b010000)
+      strcat(outputInstStr, "srai   ");
     else {
-      fprintf(stderr, "I type invalid instruction: %x\n",
+      fprintf(stderr, "[7] I type invalid instruction: %x\n",
               instNoOpcode << 7 | opcode);
       abort();
     }
@@ -534,7 +545,7 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
     outputNum = shamt;
     break;
   default:
-    fprintf(stderr, "I type invalid instruction: %x\n",
+    fprintf(stderr, "[8] I type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -556,14 +567,12 @@ static const uint8_t *rv64iTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
 
   uint8_t funct3 = (instNoOpcode >> 5) & 0b111;
-  uint8_t funct7 = instNoOpcode >> 18;
+  uint8_t funct7 = (instNoOpcode >> 18) & 0b1111111;
 
   uint8_t shamt;
   int32_t imm11_0 = instNoOpcode >> 13;
   int32_t outputNum = imm11_0;
 
-  if (imm11_0 < 0)
-    strcat(outputInstStr, "-");
   sprintf(immStr, "%u", abs(imm11_0));
 
   switch (funct3) {
@@ -575,11 +584,11 @@ static const uint8_t *rv64iTypeInst(int32_t instNoOpcode, uint8_t opcode) {
     break;
   case 0b101:
     if (funct7 == 0b0000000)
-      strcat(outputInstStr, "srliw ");
+      strcat(outputInstStr, "srliw  ");
     else if (funct7 == 0b0100000)
-      strcat(outputInstStr, "sraiw ");
+      strcat(outputInstStr, "sraiw  ");
     else {
-      fprintf(stderr, "rv64 I type invalid instruction: %x\n",
+      fprintf(stderr, "[9] rv64 I type invalid instruction: %x\n",
               instNoOpcode << 7 | opcode);
       abort();
     }
@@ -587,7 +596,7 @@ static const uint8_t *rv64iTypeInst(int32_t instNoOpcode, uint8_t opcode) {
     outputNum = shamt;
     break;
   default:
-    fprintf(stderr, "I type invalid instruction: %x\n",
+    fprintf(stderr, "[10] I type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -621,7 +630,7 @@ static const uint8_t *iTypeFenceInst(int32_t instNoOpcode, uint8_t opcode) {
     strcat(outputInstStr, "fence.i");
     break;
   default:
-    fprintf(stderr, "I type invalid instruction: %x\n",
+    fprintf(stderr, "[11] I type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -645,11 +654,11 @@ static const uint8_t *iTypeEcallInst(int32_t instNoOpcode, uint8_t opcode) {
     case 0b000000000000:
       strcat(outputInstStr, "ecall");
       break;
-    case 0b000000100000:
+    case 0b000000000001:
       strcat(outputInstStr, "ebreak");
       break;
     default:
-      fprintf(stderr, "I type invalid instruction: %x\n",
+      fprintf(stderr, "[12] I type invalid instruction: %x\n",
               instNoOpcode << 7 | opcode);
       abort();
     }
@@ -665,12 +674,12 @@ static const uint8_t *iTypeEcallInst(int32_t instNoOpcode, uint8_t opcode) {
       rs1 = (instNoOpcode >> 8) & 0b11111;
       if (funct3 == 0b001)
         strcat(outputInstStr, "csrrw ");
-      else if (funct3 == 0b001)
+      else if (funct3 == 0b010)
         strcat(outputInstStr, "csrrs ");
-      else if (funct3 == 0b001)
+      else if (funct3 == 0b011)
         strcat(outputInstStr, "csrrc ");
       else {
-        fprintf(stderr, "I type invalid instruction: %x\n",
+        fprintf(stderr, "[13] I type invalid instruction: %x\n",
                 instNoOpcode << 7 | opcode);
         abort();
       }
@@ -687,13 +696,13 @@ static const uint8_t *iTypeEcallInst(int32_t instNoOpcode, uint8_t opcode) {
       zimm = (instNoOpcode >> 8) & 0b11111;
 
       if (funct3 == 0b101)
-        strcat(outputInstStr, "csrrwi  ");
+        strcat(outputInstStr, "csrrwi ");
       else if (funct3 == 0b101)
         strcat(outputInstStr, "cssrrsi ");
       else if (funct3 == 0b101)
-        strcat(outputInstStr, "csrrci  ");
+        strcat(outputInstStr, "csrrci ");
       else {
-        fprintf(stderr, "I type invalid instruction: %x\n",
+        fprintf(stderr, "[14] I type invalid instruction: %x\n",
                 instNoOpcode << 7 | opcode);
         abort();
       }
@@ -707,7 +716,7 @@ static const uint8_t *iTypeEcallInst(int32_t instNoOpcode, uint8_t opcode) {
       break;
 
     default:
-      fprintf(stderr, "I type invalid instruction: %x\n",
+      fprintf(stderr, "[15] I type invalid instruction: %x\n",
               instNoOpcode << 7 | opcode);
       abort();
     }
@@ -730,21 +739,21 @@ static const uint8_t *sTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 
   switch (funct3) {
   case 0b000:
-    strcat(outputInstStr, "sb    ");
+    strcat(outputInstStr, "sb     ");
     break;
   case 0b001:
-    strcat(outputInstStr, "sh    ");
+    strcat(outputInstStr, "sh     ");
     break;
   case 0b010:
-    strcat(outputInstStr, "sw    ");
+    strcat(outputInstStr, "sw     ");
     break;
 
     /*rv64*/
   case 0b011:
-    strcat(outputInstStr, "sd    ");
+    strcat(outputInstStr, "sd     ");
     break;
   default:
-    fprintf(stderr, "S type invalid instruction: %x\n",
+    fprintf(stderr, "[15] S type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -790,9 +799,9 @@ static const uint8_t *bTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t rs1 = (instNoOpcode >> 8) & 0b11111;
   uint8_t rs2 = (instNoOpcode >> 13) & 0b11111;
 
-  int32_t imm12_12 = (instNoOpcode >> 31) & 0b1;
+  int32_t imm12_12 = instNoOpcode >> 24;
   int32_t imm11_11 = instNoOpcode & 0b1;
-  int32_t imm10_5 = (instNoOpcode >> 25) & 0b111111;
+  int32_t imm10_5 = (instNoOpcode >> 18) & 0b111111;
   int32_t imm4_1 = (instNoOpcode >> 1) & 0b1111;
 
   int32_t imm12 = imm12_12 << 12 | imm11_11 << 11 | imm10_5 << 5 | imm4_1 << 1;
@@ -801,25 +810,25 @@ static const uint8_t *bTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 
   switch (funct3) {
   case 0b000:
-    strcat(outputInstStr, "beq   ");
+    strcat(outputInstStr, "beq    ");
     break;
   case 0b001:
-    strcat(outputInstStr, "bne   ");
+    strcat(outputInstStr, "bne    ");
     break;
   case 0b100:
-    strcat(outputInstStr, "blt   ");
+    strcat(outputInstStr, "blt    ");
     break;
   case 0b101:
-    strcat(outputInstStr, "bge   ");
+    strcat(outputInstStr, "bge    ");
     break;
   case 0b110:
-    strcat(outputInstStr, "bltu  ");
+    strcat(outputInstStr, "bltu   ");
     break;
   case 0b111:
-    strcat(outputInstStr, "bgeu  ");
+    strcat(outputInstStr, "bgeu   ");
     break;
   default:
-    fprintf(stderr, "B type invalid instruction: %x\n",
+    fprintf(stderr, "[16] B type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -842,11 +851,11 @@ static const uint8_t *uTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   sprintf(immStr, "%u", abs(imm31_12));
 
   if (opcode == 0b0110111)
-    strcat(outputInstStr, "lui   ");
+    strcat(outputInstStr, "lui    ");
   else if (opcode == 0b0010111)
-    strcat(outputInstStr, "auipc ");
+    strcat(outputInstStr, "auipc  ");
   else {
-    fprintf(stderr, "U type invalid instruction: %x\n",
+    fprintf(stderr, "[17] U type invalid instruction: %x\n",
             instNoOpcode << 7 | opcode);
     abort();
   }
@@ -863,7 +872,7 @@ static const uint8_t *uTypeInst(int32_t instNoOpcode, uint8_t opcode) {
 static const uint8_t *jTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t rd = instNoOpcode & 0b11111;
 
-  int32_t imm20_20 = (instNoOpcode >> 24) & 0b1;
+  int32_t imm20_20 = instNoOpcode >> 24;
   int32_t imm19_12 = (instNoOpcode >> 5) & 0b11111111;
   int32_t imm11_11 = (instNoOpcode >> 13) & 0b1;
   int32_t imm10_1 = (instNoOpcode >> 14) & 0b1111111111;
@@ -872,6 +881,7 @@ static const uint8_t *jTypeInst(int32_t instNoOpcode, uint8_t opcode) {
       imm20_20 << 20 | imm19_12 << 12 | imm11_11 << 11 | imm10_1 << 1;
   sprintf(immStr, "%u", abs(imm20));
 
+  strcat(outputInstStr, "jal    ");
   strcat(outputInstStr, intRegAbiName[rd]);
   strcat(outputInstStr, ",");
   if (imm20 < 0)
@@ -951,7 +961,7 @@ static void decode(int32_t instruction, bool isUncompressionInst) {
       break;
 
     default:
-      fprintf(stderr, "Invalid instruction: %x\n", instruction);
+      fprintf(stderr, "[18] Invalid instruction: %x\n", instruction);
       abort();
     }
 
