@@ -106,9 +106,9 @@ static const uint8_t *rTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   }
   strcat(outputInstStr, intRegAbiName[rd]);
   strcat(outputInstStr, ",");
-  strcat(outputInstStr, intRegAbiName[rs2]);
-  strcat(outputInstStr, ",");
   strcat(outputInstStr, intRegAbiName[rs1]);
+  strcat(outputInstStr, ",");
+  strcat(outputInstStr, intRegAbiName[rs2]);
 
   return outputInstStr;
 }
@@ -430,6 +430,7 @@ static const uint8_t *iTypeJalrInst(int32_t instNoOpcode, uint8_t opcode) {
   if (imm31_12 < 0)
     strcat(outputInstStr, "-");
   sprintf(immStr, "%u", abs(imm31_12));
+  strcat(outputInstStr, immStr);
   strcat(outputInstStr, "(");
   strcat(outputInstStr, intRegAbiName[rs1]);
   strcat(outputInstStr, ")");
@@ -476,6 +477,7 @@ static const uint8_t *iTypeLbInst(int32_t instNoOpcode, uint8_t opcode) {
   if (imm11_0 < 0)
     strcat(outputInstStr, "-");
   sprintf(immStr, "%u", abs(imm11_0));
+  strcat(outputInstStr, immStr);
   strcat(outputInstStr, "(");
   strcat(outputInstStr, intRegAbiName[rs1]);
   strcat(outputInstStr, ")");
@@ -518,11 +520,11 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
   case 0b001:
   case 0b101:
     if (funct3 == 0b001 && funct7 == 0b0000000)
-      strcat(outputInstStr, "slli ");
+      strcat(outputInstStr, "slli  ");
     else if (funct3 == 0b101 && funct7 == 0b0000000)
-      strcat(outputInstStr, "srli ");
+      strcat(outputInstStr, "srli  ");
     else if (funct3 == 0b101 && funct7 == 0b0100000)
-      strcat(outputInstStr, "srai ");
+      strcat(outputInstStr, "srai  ");
     else {
       fprintf(stderr, "I type invalid instruction: %x\n",
               instNoOpcode << 7 | opcode);
@@ -540,6 +542,7 @@ static const uint8_t *iTypeAddiInst(int32_t instNoOpcode, uint8_t opcode) {
   strcat(outputInstStr, intRegAbiName[rd]);
   strcat(outputInstStr, ",");
   strcat(outputInstStr, intRegAbiName[rs1]);
+  strcat(outputInstStr, ",");
   if (outputNum < 0)
     strcat(outputInstStr, "-");
   sprintf(immStr, "%u", abs(outputNum));
@@ -574,7 +577,7 @@ static const uint8_t *rv64iTypeInst(int32_t instNoOpcode, uint8_t opcode) {
     if (funct7 == 0b0000000)
       strcat(outputInstStr, "srliw ");
     else if (funct7 == 0b0100000)
-      strcat(outputInstStr, "sraiw  ");
+      strcat(outputInstStr, "sraiw ");
     else {
       fprintf(stderr, "rv64 I type invalid instruction: %x\n",
               instNoOpcode << 7 | opcode);
@@ -592,6 +595,7 @@ static const uint8_t *rv64iTypeInst(int32_t instNoOpcode, uint8_t opcode) {
   strcat(outputInstStr, intRegAbiName[rd]);
   strcat(outputInstStr, ",");
   strcat(outputInstStr, intRegAbiName[rs1]);
+  strcat(outputInstStr, ",");
   if (outputNum < 0)
     strcat(outputInstStr, "-");
   sprintf(immStr, "%u", abs(outputNum));

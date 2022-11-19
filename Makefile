@@ -23,7 +23,7 @@ readelf-add : $(TOPDIR)/src/readelf/readelf-riscv
 	#qemu-riscv64 $(TOPDIR)/src/readelf/readelf-riscv /home/user/code/riscv/dwarf_relocations/add.c.S.o
 
 readelf-coremark : $(TOPDIR)/src/readelf/readelf-riscv
-	$(TOPDIR)/src/readelf/readelf-riscv /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc
+	$(TOPDIR)/src/readelf/readelf-riscv /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc 2>&1 | tee coremark.bare.riscv.a510Gcc.log
 	#qemu-riscv64 $(TOPDIR)/src/readelf/readelf-riscv /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc
 
 riscvElf :
