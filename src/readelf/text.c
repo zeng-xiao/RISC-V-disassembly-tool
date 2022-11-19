@@ -619,11 +619,28 @@ static const uint8_t *iTypeFenceInst(int32_t instNoOpcode, uint8_t opcode) {
   uint8_t pred = (instNoOpcode >> 17) & 0b1111;
   uint8_t succ = (instNoOpcode >> 13) & 0b1111;
 
+  const uint8_t *iorw[4] = {"i", "o", "r", "w"};
+
+  bool predBool[4] = {false, false, false, false};
+  bool succBool[4] = {false, false, false, false};
+
+  bool *p;
+
+  p = predBool;
+  for (int i = 0; i < 4; i++)
+    if (pred & (0b1 << 3 - i))
+      *p++ = true;
+
+  p = succBool;
+  for (int i = 0; i < 4; i++)
+    if (succ & (0b1 << 3 - i))
+      *p++ = true;
+
   bool fence = false;
 
   switch (funct3) {
   case 0b000:
-    strcat(outputInstStr, "fence ");
+    strcat(outputInstStr, "fence  ");
     fence = true;
     break;
   case 0b001:
@@ -636,9 +653,13 @@ static const uint8_t *iTypeFenceInst(int32_t instNoOpcode, uint8_t opcode) {
   }
 
   if (fence) {
-    sprintf(immStr, "%u", pred);
+    for (int i = 0; i < 4; i++)
+      if (predBool[i])
+        strcat(outputInstStr, iorw[i]);
     strcat(outputInstStr, ",");
-    sprintf(immStr, "%u", succ);
+    for (int i = 0; i < 4; i++)
+      if (succBool[i])
+        strcat(outputInstStr, iorw[i]);
   }
 
   return outputInstStr;
