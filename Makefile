@@ -1,22 +1,23 @@
 TOPDIR=$(shell pwd)
 
-#BINPATH=$(TOPDIR)/bin
-#BUILDPATH=$(TOPDIR)/build
+OUTPATH=$(TOPDIR)/out
+BUILDPATH=$(TOPDIR)/build
+
 #LIBPATH=$(TOPDIR)/lib
 #export BINPATH BUILDPATH
 
-exclude_dirs= bin build include
+exclude_dirs= out build include
 export exclude_dirs
 
 .PHONY=all
-all: $(BINPATH) $(BUILDPATH)
+all: $(OUTPATH) $(BUILDPATH)
 	make -f $(TOPDIR)/Makefile.env all
 
 $(BUILDPATH):
 	mkdir -p $(BUILDPATH)
 
-$(BINPATH):
-	mkdir -p $(BINPATH)
+$(OUTPATH):
+	mkdir -p $(OUTPATH)
 
 elfParser-add : $(TOPDIR)/src/elfParser/elfParser
 	$(TOPDIR)/src/elfParser/elfParser /home/user/code/riscv/dwarf_relocations/add.c.S.o
@@ -43,4 +44,4 @@ x86Disassembly : $(TOPDIR)/src/elfParser/elfParser
 .PHONY=clean
 clean:
 	make -f $(TOPDIR)/Makefile.env clean
-	rm -rf build bin
+	rm -rf build out

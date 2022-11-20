@@ -6,7 +6,103 @@ INCLUDEPATH=./include
 
 LIBPATH=$(TOPDIR)/lib
 
-include $(TOPDIR)/Makefile.env
+####################  Makefile.env  #######################
+# Top level pattern, include by Makefile of child directory
+# in which variable like TOPDIR, TARGET or LIB may be needed
+###########################################################
+
+CC=gcc
+CFLAGS=-g3 -ggdb -gdwarf -O0 -Werror
+LDFLAGS=
+
+MAKE=make
+
+AR=ar cr
+
+# Get the name of the next level directory, so that 
+# subsequent cycles can call the Makefile of the next level directory
+
+# Dir of exclude_dirs represents the directory that does not need to 
+# be retrieved, and this variable is given by the top-level Makefile
+
+dirs:=$(shell find . -maxdepth 1 -type d)
+dirs:=$(basename $(patsubst ./%,%,$(dirs)))
+dirs:=$(filter-out $(exclude_dirs),$(dirs))
+SUBDIRS:=$(dirs)
+
+# The purpose here is to put the path of the main module at the 
+# end, so that other sub modules can be compiled first
+
+# The main module directory is given first. When the next 
+# level contains the main module directory, the main
+# module directory is filtered out first, and then spliced to the end
+
+SOURCEDIR=elfParser
+TMPDIR:=$(filter $(SOURCEDIR),$(SUBDIRS))
+
+$(warning SUBDIRS = $(SUBDIRS)) 
+$(warning SOURCEDIR = $(SOURCEDIR))
+$(warning TMPDIR = $(TMPDIR)) 
+
+ifeq ($(TMPDIR),$(SOURCEDIR))
+$(warning "xzeng")
+$(info $(SOURCEDIR) )
+$(warning  SOURCEDIR is $(SOURCEDIR))
+$(warning  $(TMPDIR)) 
+SUBDIRS:=$(filter-out $(SOURCEDIR),$(dirs)) $(SOURCEDIR)
+$(warning  $(SUBDIRS))
+endif
+
+# Get the source file, target file and dependent file name
+SRCS=$(wildcard *.c)
+OBJS=$(patsubst %.c,%.o,$(SRCS))
+DEPS=$(patsubst %.c,%.d,$(SRCS))
+
+################ all #################
+# The TARGET and LIB variables here are given by the 
+# Makefiles of the main module and the sub module respectively. 
+# If there is no such variable, no rule will be made
+
+.PHONY=all
+all:$(TARGET) $(LIB) subdirs
+
+
+#该规则是这个M的重点，代表层级调用，循环调用每个子目录下的Makefile
+subdirs:$(SUBDIRS)
+	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS)"
+	for dir in $(SUBDIRS);\
+	do $(MAKE) -C $$dir all || exit 1;\
+	done
+
+$(TARGET):$(OBJS) 
+	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS) OBJS=$(OBJS)"
+	@echo "Compiling $(TARGET)"
+	$(CC) $^ -o $@ $(LDFLAGS) $(EXTERNAL)
+
+%.o:%.c
+	@echo "Compiling $<"
+	$(CC) -c  $< -o $@ $(CFLAGS) -I $(INCLUDEPATH)
+
+###########  生成和包含依赖文件include .d  ###############
+#这里表示当make clean时就不进行这个操作了
+ifneq ($(MAKECMDGOALS),clean)
+include $(DEPS)
+endif
+
+#注意：这里人为指定了依赖关系中的目标为.o和.d，为的是在h文件更新时，依赖文件也能更新
+%.d:%.c
+	@echo "creating $@"
+	$(CC) $< -MM -MF $@ -MT $*.o -MT $*.d -I $(INCLUDEPATH)
+
+########### clean ###################
+.PHONY=clean
+clean:
+	@echo "$(shell pwd) cleaning "
+	for dir in $(SUBDIRS);\
+	do $(MAKE) -C $$dir clean||exit 1;\
+	done
+	rm -f $(OBJS) $(TARGET) $(LIB) $(DEPS)
+
 
 $(LIB):$(OBJS)
 	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS) $(OBJS)"
