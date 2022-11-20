@@ -10,7 +10,7 @@ build
 *.d
 
 # elf
-readelf-riscv
+elfParser
 
 # log file
 *.txt

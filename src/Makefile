@@ -20,7 +20,7 @@ SUBDIRS:=$(dirs)
 #这里的目的是将主模块的路径放在最后，以便其余子模块先编译
 #基本原理是先给出主模块的目录，在检索到下一层级包含有主模块目录时，
 #将主模块目录先从其中过滤出来，然后在拼接到末尾
-SOURCEDIR=readelf
+SOURCEDIR=elfParser
 TMPDIR:=$(filter $(SOURCEDIR),$(dirs))
 
 ifeq ($(TMPDIR),$(SOURCEDIR))

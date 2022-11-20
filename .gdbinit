@@ -1,4 +1,4 @@
-file /home/user/RISC-V-disassembly-tools/src/readelf/readelf-riscv 
+file /home/user/RISC-V-disassembly-tools/src/elfParser/elfParser
 
 set args /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc
 
