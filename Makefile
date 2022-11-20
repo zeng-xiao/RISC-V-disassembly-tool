@@ -17,7 +17,7 @@ $(OUTPATH):
 
 .PHONY=all
 all: $(OUTPATH) $(BUILDPATH)
-	make -f $(TOPDIR)/Makefile.env all
+	make -f $(TOPDIR)/Makefile.mk all
 
 riscv: clean riscvElf riscvElfParser-coremark
 
@@ -35,10 +35,10 @@ riscvElfParser-coremark : $(TOPDIR)/src/elfParser/elfParser
 	qemu-riscv64 $(TOPDIR)/src/elfParser/elfParser /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc
 
 riscvElf :
-	make CC=/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror -march=rv64gc -mabi=lp64d" LDFLAGS="-static" -f $(TOPDIR)/Makefile.env all
+	make CC=/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror -march=rv64gc -mabi=lp64d" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
 
 x86Elf :
-	make CC=gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror" LDFLAGS="-static" -f $(TOPDIR)/Makefile.env all
+	make CC=gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
 
 riscvDisassembly : $(TOPDIR)/src/elfParser/elfParser
 	/home/user/Downloads/daily/bin/riscv64-unknown-elf-objdump -drswtaxzD -WF -Wf -M no-aliases $(TOPDIR)/src/elfParser/elfParser > $(TOPDIR)/src/elfParser/elfParser.objdump.txt
@@ -50,5 +50,5 @@ x86Disassembly : $(TOPDIR)/src/elfParser/elfParser
 
 .PHONY=clean
 clean:
-	make -f $(TOPDIR)/Makefile.env clean
+	make -f $(TOPDIR)/Makefile.mk clean
 	rm -rf build out
