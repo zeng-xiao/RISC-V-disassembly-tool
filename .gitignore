@@ -10,7 +10,7 @@ build
 *.d
 
 # elf
-elfParser
+elfParser/elfParser
 
 # log file
 *.txt
