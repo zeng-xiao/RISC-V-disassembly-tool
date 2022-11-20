@@ -1,6 +1,12 @@
-LIB=libdataOprate.a
+CURRENTDIR=$(shell pwd)
+TOPDIR=$(abspath $(CURRENTDIR)./../..)
 
-INCLUDEPATH=./include
+
+vpath=$(subst $(TOPDIR),,$(CURRENTDIR))
+OUTPUTDIR=$(abspath $(CURRENTDIR)/../../build/$(vpath))
+INCLUDEPATH=$(abspath $(CURRENTDIR)/include)
+
+LIB=libdataOprate.a
 
 MAKE=make
 
@@ -8,12 +14,13 @@ AR=ar cr
 
 # Get the source file, target file and dependent file name
 SRCS=$(wildcard *.c)
-OBJS=$(patsubst %.c,%.o,$(SRCS))
-DEPS=$(patsubst %.c,%.d,$(SRCS))
+OBJS=$(patsubst %.c,$(OUTPUTDIR)/%.o,$(SRCS))
+DEPS=$(patsubst %.c,$(OUTPUTDIR)/%.d,$(SRCS))
 
 $(LIB):$(OBJS)
 	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS) $(OBJS)"
-	$(AR) $@ $(OBJS)
+	mkdir -p $(OUTPUTDIR)
+	$(AR) $(OUTPUTDIR)/$@ $(OBJS)
 
 ################ all #################
 # The TARGET and LIB variables here are given by the 
@@ -22,8 +29,9 @@ $(LIB):$(OBJS)
 .PHONY=all
 all: $(LIB)
 
-%.o:%.c
+$(OUTPUTDIR)/%.o:%.c
 	@echo "Compiling $<"
+	mkdir -p $(OUTPUTDIR)
 	$(CC) -c  $< -o $@ $(CFLAGS) -I $(INCLUDEPATH)
 
 ###########  生成和包含依赖文件include .d  ###############
@@ -32,17 +40,16 @@ ifneq ($(MAKECMDGOALS),clean)
 include $(DEPS)
 endif
 
-#注意：这里人为指定了依赖关系中的目标为.o和.d，为的是在h文件更新时，依赖文件也能更新
-%.d:%.c
+$(OUTPUTDIR)/%.d:%.c
 	@echo "creating $@"
+	mkdir -p $(OUTPUTDIR)
 	$(CC) $< -MM -MF $@ -MT $*.o -MT $*.d -I $(INCLUDEPATH)
 
-########### clean ###################
+
 .PHONY=clean
 clean:
 	@echo "$(shell pwd) cleaning "
 	for dir in $(SUBDIRS);\
 	do $(MAKE) -C $$dir clean||exit 1;\
 	done
-	rm -f $(OBJS) $(TARGET) $(LIB) $(DEPS)
-
+	rm -f $(OBJS) $(LIB) $(DEPS)

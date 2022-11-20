@@ -6,16 +6,11 @@ vpath=$(subst $(TOPDIR),,$(CURRENTDIR))
 
 OUTPUTDIR=$(abspath $(CURRENTDIR)/../../build/$(vpath))
 
-$(warning TOPDIRABSPATH=$(TOPDIR))
-$(warning CURRENTDIR=$(CURRENTDIR))
-$(warning vpath=$(vpath))
-$(warning OUTPUTDIR=$(OUTPUTDIR))
-
 TARGET=elfParser
 
 INCLUDEPATH=$(CURRENTDIR)/include -I $(CURRENTDIR)/../common/include
 
-EXTERNAL = -L $(CURRENTDIR)/../common -ldataOprate
+EXTERNAL = -L $(OUTPUTDIR)/../common -ldataOprate
 
 MAKE=make
 
