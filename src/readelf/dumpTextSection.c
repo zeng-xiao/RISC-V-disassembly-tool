@@ -8,8 +8,6 @@
 
 #include "dataOperate.h"
 
-#include "instructions.def"
-
 extern uint64_t shdrTextOff;
 extern uint64_t shdrTextSize;
 

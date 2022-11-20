@@ -9,7 +9,7 @@
 
 #include "debug_frame.h"
 
-#include "text.h"
+#include "dumpTextSection.h"
 
 int main(int argc, char **argv) {
   const char *inputFileName = argv[1];
