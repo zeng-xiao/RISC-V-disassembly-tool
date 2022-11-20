@@ -32,7 +32,7 @@ all: $(LIB)
 $(OUTPUTDIR)/%.o:%.c
 	@echo "Compiling $<"
 	mkdir -p $(OUTPUTDIR)
-	$(CC) -c  $< -o $@ $(CFLAGS) -I $(INCLUDEPATH)
+	$(CC) -c  $(CURRENTDIR)/$< -o $@ $(CFLAGS) -I $(INCLUDEPATH)
 
 ###########  生成和包含依赖文件include .d  ###############
 #这里表示当make clean时就不进行这个操作了
@@ -43,7 +43,7 @@ endif
 $(OUTPUTDIR)/%.d:%.c
 	@echo "creating $@"
 	mkdir -p $(OUTPUTDIR)
-	$(CC) $< -MM -MF $@ -MT $*.o -MT $*.d -I $(INCLUDEPATH)
+	$(CC) $(CURRENTDIR)/$< -MM -MF $@ -MT $*.o -MT $*.d -I $(INCLUDEPATH)
 
 
 .PHONY=clean
