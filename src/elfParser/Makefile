@@ -1,10 +1,21 @@
-TOPDIR=./../..
+CURRENTDIR=$(shell pwd)
+TOPDIR=$(abspath $(CURRENTDIR)./../..)
+
+
+vpath=$(subst $(TOPDIR),,$(CURRENTDIR))
+
+OUTPUTDIR=$(abspath $(CURRENTDIR)/../../build/$(vpath))
+
+$(warning TOPDIRABSPATH=$(TOPDIR))
+$(warning CURRENTDIR=$(CURRENTDIR))
+$(warning vpath=$(vpath))
+$(warning OUTPUTDIR=$(OUTPUTDIR))
 
 TARGET=elfParser
 
-INCLUDEPATH=./include -I ../common/include
+INCLUDEPATH=$(CURRENTDIR)/include -I $(CURRENTDIR)/../common/include
 
-EXTERNAL = -L ../common -ldataOprate
+EXTERNAL = -L $(CURRENTDIR)/../common -ldataOprate
 
 MAKE=make
 
@@ -26,11 +37,13 @@ all:$(TARGET)
 $(TARGET):$(OBJS) 
 	@echo "$(shell pwd) TARGET=$(TARGET) SUBDIRS=$(SUBDIRS) OBJS=$(OBJS)"
 	@echo "Compiling $(TARGET)"
-	$(CC) $^ -o $@ $(LDFLAGS) $(EXTERNAL)
+	mkdir -p $(OUTPUTDIR)
+	$(CC) $(CURRENTDIR)/$^ -o $(OUTPUTDIR)/$@ $(LDFLAGS) $(EXTERNAL)
 
 %.o:%.c
 	@echo "Compiling $<"
-	$(CC) -c  $< -o $@ $(CFLAGS) -I $(INCLUDEPATH)
+	mkdir -p $(OUTPUTDIR)
+	$(CC) -c  $< -o $(OUTPUTDIR)/$@ $(CFLAGS) -I $(INCLUDEPATH)
 
 ###########  生成和包含依赖文件include .d  ###############
 #这里表示当make clean时就不进行这个操作了
@@ -41,7 +54,8 @@ endif
 #注意：这里人为指定了依赖关系中的目标为.o和.d，为的是在h文件更新时，依赖文件也能更新
 %.d:%.c
 	@echo "creating $@"
-	$(CC) $< -MM -MF $@ -MT $*.o -MT $*.d -I $(INCLUDEPATH)
+	mkdir -p $(OUTPUTDIR)
+	$(CC) $< -MM -MF $(OUTPUTDIR)/$@ -MT $(OUTPUTDIR)/$*.o -MT $(OUTPUTDIR)/$*.d -I $(INCLUDEPATH)
 
 ########### clean ###################
 .PHONY=clean
