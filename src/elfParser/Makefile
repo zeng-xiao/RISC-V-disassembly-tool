@@ -4,14 +4,7 @@ TARGET=elfParser
 
 INCLUDEPATH=./include -I ../common/include
 
-####################  Makefile.env  #######################
-# Top level pattern, include by Makefile of child directory
-# in which variable like TOPDIR, TARGET or LIB may be needed
-###########################################################
-
-CC=gcc
-CFLAGS=-g3 -ggdb -gdwarf -O0 -Werror
-LDFLAGS=
+EXTERNAL = -L ../common -ldataOprate
 
 MAKE=make
 
@@ -28,10 +21,10 @@ DEPS=$(patsubst %.c,%.d,$(SRCS))
 # If there is no such variable, no rule will be made
 
 .PHONY=all
-all:$(TARGET) $(LIB)
+all:$(TARGET)
 
 $(TARGET):$(OBJS) 
-	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS) OBJS=$(OBJS)"
+	@echo "$(shell pwd) TARGET=$(TARGET) SUBDIRS=$(SUBDIRS) OBJS=$(OBJS)"
 	@echo "Compiling $(TARGET)"
 	$(CC) $^ -o $@ $(LDFLAGS) $(EXTERNAL)
 
@@ -57,7 +50,4 @@ clean:
 	for dir in $(SUBDIRS);\
 	do $(MAKE) -C $$dir clean||exit 1;\
 	done
-	rm -f $(OBJS) $(TARGET) $(LIB) $(DEPS)
-
-
-EXTERNAL = -L ../common -ldataOprate
+	rm -f $(OBJS) $(TARGET) $(DEPS)

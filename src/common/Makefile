@@ -1,83 +1,26 @@
-TOPDIR=./../..
-
 LIB=libdataOprate.a
 
 INCLUDEPATH=./include
 
-LIBPATH=$(TOPDIR)/lib
-
-####################  Makefile.env  #######################
-# Top level pattern, include by Makefile of child directory
-# in which variable like TOPDIR, TARGET or LIB may be needed
-###########################################################
-
-CC=gcc
-CFLAGS=-g3 -ggdb -gdwarf -O0 -Werror
-LDFLAGS=
-
 MAKE=make
 
 AR=ar cr
-
-# Get the name of the next level directory, so that 
-# subsequent cycles can call the Makefile of the next level directory
-
-# Dir of exclude_dirs represents the directory that does not need to 
-# be retrieved, and this variable is given by the top-level Makefile
-
-dirs:=$(shell find . -maxdepth 1 -type d)
-dirs:=$(basename $(patsubst ./%,%,$(dirs)))
-dirs:=$(filter-out $(exclude_dirs),$(dirs))
-SUBDIRS:=$(dirs)
-
-# The purpose here is to put the path of the main module at the 
-# end, so that other sub modules can be compiled first
-
-# The main module directory is given first. When the next 
-# level contains the main module directory, the main
-# module directory is filtered out first, and then spliced to the end
-
-SOURCEDIR=elfParser
-TMPDIR:=$(filter $(SOURCEDIR),$(SUBDIRS))
-
-$(warning SUBDIRS = $(SUBDIRS)) 
-$(warning SOURCEDIR = $(SOURCEDIR))
-$(warning TMPDIR = $(TMPDIR)) 
-
-ifeq ($(TMPDIR),$(SOURCEDIR))
-$(warning "xzeng")
-$(info $(SOURCEDIR) )
-$(warning  SOURCEDIR is $(SOURCEDIR))
-$(warning  $(TMPDIR)) 
-SUBDIRS:=$(filter-out $(SOURCEDIR),$(dirs)) $(SOURCEDIR)
-$(warning  $(SUBDIRS))
-endif
 
 # Get the source file, target file and dependent file name
 SRCS=$(wildcard *.c)
 OBJS=$(patsubst %.c,%.o,$(SRCS))
 DEPS=$(patsubst %.c,%.d,$(SRCS))
 
+$(LIB):$(OBJS)
+	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS) $(OBJS)"
+	$(AR) $@ $(OBJS)
+
 ################ all #################
 # The TARGET and LIB variables here are given by the 
 # Makefiles of the main module and the sub module respectively. 
 # If there is no such variable, no rule will be made
-
 .PHONY=all
-all:$(TARGET) $(LIB) subdirs
-
-
-#该规则是这个M的重点，代表层级调用，循环调用每个子目录下的Makefile
-subdirs:$(SUBDIRS)
-	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS)"
-	for dir in $(SUBDIRS);\
-	do $(MAKE) -C $$dir all || exit 1;\
-	done
-
-$(TARGET):$(OBJS) 
-	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS) OBJS=$(OBJS)"
-	@echo "Compiling $(TARGET)"
-	$(CC) $^ -o $@ $(LDFLAGS) $(EXTERNAL)
+all: $(LIB)
 
 %.o:%.c
 	@echo "Compiling $<"
@@ -103,7 +46,3 @@ clean:
 	done
 	rm -f $(OBJS) $(TARGET) $(LIB) $(DEPS)
 
-
-$(LIB):$(OBJS)
-	@echo "$(shell pwd) TARGET=$(TARGET) LIB=$(LIB) SUBDIRS=$(SUBDIRS) $(OBJS)"
-	$(AR) $@ $(OBJS)
