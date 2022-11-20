@@ -23,33 +23,33 @@ all: $(OUTPATH) $(BUILDPATH)
 riscv: clean $(OUTPATH) $(BUILDPATH) riscvElf
 x86: clean $(OUTPATH) $(BUILDPATH) x86Elf
 
-riscvAll: clean  $(OUTPATH) $(BUILDPATH) riscvElf riscvElfParser-coremark
-x86All: clean $(OUTPATH) $(BUILDPATH) x86Elf x86ElfParser-coremark
+riscvAll: riscvElf $(OUTPATH) $(BUILDPATH) riscvElfParser-coremark
+x86All: x86Elf $(OUTPATH) $(BUILDPATH) x86ElfParser-coremark
 
-elfParser-add : $(TOPDIR)/src/elfParser/elfParser
-	$(TOPDIR)/src/elfParser/elfParser /home/user/code/riscv/dwarf_relocations/add.c.S.o
-	#qemu-riscv64 $(TOPDIR)/src/elfParser/elfParser /home/user/code/riscv/dwarf_relocations/add.c.S.o
+elfParser-add : $(TOPDIR)/build/src/elfParser/elfParser
+	$(TOPDIR)/build/src/elfParser/elfParser /home/user/code/riscv/dwarf_relocations/add.c.S.o
+	#qemu-riscv64 $(TOPDIR)/build/src/elfParser/elfParser /home/user/code/riscv/dwarf_relocations/add.c.S.o
 
-x86ElfParser-coremark : $(TOPDIR)/src/elfParser/elfParser
-	$(TOPDIR)/src/elfParser/elfParser /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc 2>&1 | tee coremark.bare.riscv.a510Gcc.log
+x86ElfParser-coremark : x86Elf $(TOPDIR)/build/src/elfParser/elfParser
+	$(TOPDIR)/build/src/elfParser/elfParser /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc 2>&1 | tee coremark.bare.riscv.a510Gcc.log
 
-riscvElfParser-coremark : $(TOPDIR)/src/elfParser/elfParser
-	$(TOPDIR)/src/elfParser/elfParser /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc 2>&1 | tee coremark.bare.riscv.a510Gcc.log
-	qemu-riscv64 $(TOPDIR)/src/elfParser/elfParser /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc
+riscvElfParser-coremark : riscvElf $(TOPDIR)/build/src/elfParser/elfParser
+	$(TOPDIR)/build/src/elfParser/elfParser /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc 2>&1 | tee coremark.bare.riscv.a510Gcc.log
+	qemu-riscv64 $(TOPDIR)/build/src/elfParser/elfParser /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc
 
-riscvElf :
+riscvElf : clean
 	make CC=/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror -march=rv64gc -mabi=lp64d" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
 
-x86Elf :
+x86Elf : clean
 	make CC=gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
 
-riscvDisassembly : $(TOPDIR)/src/elfParser/elfParser
-	/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-objdump -drswtaxzD -WF -Wf -M no-aliases $(TOPDIR)/src/elfParser/elfParser > $(TOPDIR)/src/elfParser/elfParser.objdump.txt
-	/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-readelf --debug-dump=info --debug-dump=str -aW $(TOPDIR)/src/elfParser/elfParser > $(TOPDIR)/src/elfParser/elfParser.readelf.txt
+riscvDisassembly : riscvElf $(TOPDIR)/build/src/elfParser/elfParser
+	/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-objdump -drswtaxzD -WF -Wf -M no-aliases $(TOPDIR)/build/src/elfParser/elfParser > $(TOPDIR)/build/src/elfParser/elfParser.objdump.txt
+	/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-readelf --debug-dump=info --debug-dump=str -aW $(TOPDIR)/build/src/elfParser/elfParser > $(TOPDIR)/build/src/elfParser/elfParser.readelf.txt
 
-x86Disassembly : $(TOPDIR)/src/elfParser/elfParser
-	objdump -drswtaxzD -WF -Wf -M no-aliases $(TOPDIR)/src/elfParser/readelf-riscv > $(TOPDIR)/src/elfParser/elfParser.objdump.txt
-	readelf --debug-dump=info --debug-dump=str -aW $(TOPDIR)/src/elfParser/readelf-riscv > $(TOPDIR)/src/elfParser/elfParser.readelf.txt
+x86Disassembly : x86Elf $(TOPDIR)/build/src/elfParser/elfParser
+	objdump -drswtaxzD -WF -Wf -M no-aliases $(TOPDIR)/build/src/elfParser/elfParser > $(TOPDIR)/build/src/elfParser/elfParser.objdump.txt
+	readelf --debug-dump=info --debug-dump=str -aW $(TOPDIR)/build/src/elfParser/elfParser > $(TOPDIR)/build/src/elfParser/elfParser.readelf.txt
 
 .PHONY=clean
 clean:
