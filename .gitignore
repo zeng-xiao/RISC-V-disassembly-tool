@@ -2,9 +2,6 @@
 out
 build
 
-# vscode
-.vscode
-
 # log file
 *.txt
 *.log

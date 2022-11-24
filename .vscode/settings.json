@@ -1,0 +1,26 @@
+{
+        "files.associations": {
+                "*.S": "riscv",
+                "*.sh": "shellscript",
+                "*.inc": "cpp",
+                "*.def": "c",
+                "*.s": "riscv",
+                "*.obj": "riscv",
+                "*.diff": "c",
+                "*.c.[0-9]*r.*": "lisp",
+                ".gdbinit": "txt",
+                "*.riscv": "riscv",
+                "*.c.[0-9]*t.*": "lisp",
+                "*.awk": "bash",
+                "*.env": "Makefile",
+                "*.md": "lisp",
+                "Makefile.env": "Makefile",
+                "elf.h": "c",
+                "elfheader.h": "c",
+                "programheader.h": "c",
+                "sectionheader.h": "c",
+                "riscv_attributes.h": "c",
+                "debug_frame.h": "c",
+                "stdio.h": "c"
+        }
+}
