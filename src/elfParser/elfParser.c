@@ -11,6 +11,13 @@
 
 #include "dumpTextSection.h"
 
+void static dumpStr(const uint8_t *inputFileName) {
+  dumpDebug_str(inputFileName);
+  dumpComment(inputFileName);
+  dumpRiscv_attributes(inputFileName);
+  dumpGCC_command_line(inputFileName);
+}
+
 int main(int argc, char **argv) {
   const char *inputFileName = argv[1];
 
@@ -18,12 +25,9 @@ int main(int argc, char **argv) {
   processSectionHeader(inputFileName);
   processProgramHeader(inputFileName);
 
-  dumpDebug_str(inputFileName);
-  dumpComment(inputFileName);
-  dumpRiscv_attributes(inputFileName);
-  dumpGCC_command_line(inputFileName);
+  dumpStr(inputFileName);
 
-  analysisDebug_frame(inputFileName);
+  analysisDebugFrame(inputFileName);
 
   disassembleTextSection(inputFileName);
 

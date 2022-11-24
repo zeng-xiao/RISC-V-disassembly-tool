@@ -1,1 +1,1 @@
-int analysisDebug_frame(const char *inputFileName) { return 0; }
+int analysisDebugFrame(const char *inputFileName) { return 0; }
