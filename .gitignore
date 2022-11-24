@@ -1,16 +1,9 @@
+# tmp dir
 out
 build
 
 # vscode
 .vscode
-
-# tmp files
-*.a
-*.o
-*.d
-
-# elf
-elfParser/elfParser
 
 # log file
 *.txt
