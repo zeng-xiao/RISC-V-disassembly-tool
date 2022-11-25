@@ -1,0 +1,22 @@
+/* rv32 */
+/* rv32I */
+
+#define LUI                                                                    \
+  { "lui", rv_codec_u, fmt_imm31_12_rd, NULL, 0, 0, 0 }
+
+/* rv32M */
+/* rv32A */
+/* rv32F */
+/* rv32D */
+/* rv32C */
+
+/* rv64 */
+/* rv64I */
+/* rv64M */
+/* rv64A */
+/* rv64F */
+/* rv64D */
+/* rv64C */
+/* rv64B */
+
+/* rv128 */
