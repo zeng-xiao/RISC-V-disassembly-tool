@@ -2,6 +2,6 @@
 #define GCC_COMMAND_LINE_h
 
 /* functions */
-int dumpGCC_command_line(const char *inputFileName);
+int dump_GCC_command_line_section(const char *inputFileName);
 
 #endif

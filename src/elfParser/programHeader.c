@@ -1,4 +1,1 @@
-int processProgramHeader (const char * inputFileName){
-    
-    return 0;
-}
+int process_program_header(const char *inputFileName) { return 0; }

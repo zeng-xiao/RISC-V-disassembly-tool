@@ -107,7 +107,7 @@ void byte_put_little_endian(unsigned char *field, uint64_t value, int size) {
   }
 }
 
-void closeFile(FILE *fileHandle) {
+void close_file(FILE *fileHandle) {
   if (fileHandle)
     fclose(fileHandle);
   else {

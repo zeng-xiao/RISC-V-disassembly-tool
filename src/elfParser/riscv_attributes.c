@@ -8,7 +8,7 @@
 extern uint64_t shdrRiscv_attributesOff;
 extern uint64_t shdrRiscv_attributesSize;
 
-int dumpRiscv_attributes(const char *inputFileName) {
+int dump_riscv_attributes_section(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");
 
   fprintf(stderr, "\n\n");
@@ -30,7 +30,7 @@ int dumpRiscv_attributes(const char *inputFileName) {
     else
       fprintf(stderr, "%c", strBuffer[charIndex]);
 
-  closeFile(fileHandle);
+  close_file(fileHandle);
 
   fprintf(stderr, "\n\n");
 

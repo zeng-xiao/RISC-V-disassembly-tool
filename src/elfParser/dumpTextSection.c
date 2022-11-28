@@ -3532,8 +3532,8 @@ void inst_fetch(const uint8_t *data, rv_inst *instp, size_t *length) {
 
 /* disassemble instruction */
 
-static void disasmInst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
-                       uint64_t pc) {
+static void disasm_inst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
+                        uint64_t pc) {
   rv_instInfo dec = {.pc = pc, .inst = inst};
   decode_inst_opcode(&dec, isa);
   decode_inst_operands(&dec);
@@ -3544,7 +3544,7 @@ static void disasmInst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
   fprintf(stderr, "%04" PRIx64 ":  %s\n", pc, buf);
 }
 
-int disassembleTextSection(const uint8_t *inputFileName) {
+int disassemble_text_section(const uint8_t *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");
 
   fprintf(stderr, "\n\n");
@@ -3567,14 +3567,14 @@ int disassembleTextSection(const uint8_t *inputFileName) {
     int32_t inst = byte_get_little_endian(instBuffer, uncompressionInstLen);
 
     if (inst_length(inst) == 4) {
-      disasmInst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
-                 shdrTextOff);
+      disasm_inst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
+                  shdrTextOff);
       instBuffer += uncompressionInstLen;
       shdrTextOff += uncompressionInstLen;
     } else if (inst_length(inst) == 2) {
       inst = byte_get_little_endian(instBuffer, compressionInstLen);
-      disasmInst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
-                 shdrTextOff);
+      disasm_inst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
+                  shdrTextOff);
       instBuffer += compressionInstLen;
       shdrTextOff += compressionInstLen;
     } else {
@@ -3582,7 +3582,7 @@ int disassembleTextSection(const uint8_t *inputFileName) {
     }
   }
 
-  closeFile(fileHandle);
+  close_file(fileHandle);
 
   fprintf(stderr, "\n\n");
   return 0;

@@ -8,7 +8,7 @@
 extern uint64_t shdrDebug_strOff;
 extern uint64_t shdrDebug_strSize;
 
-int dumpDebug_str(const char *inputFileName) {
+int dump_debug_str_section(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");
 
   fprintf(stderr, "\n\n");
@@ -30,7 +30,7 @@ int dumpDebug_str(const char *inputFileName) {
     else
       fprintf(stderr, "%c", strBuffer[charIndex]);
 
-  closeFile(fileHandle);
+  close_file(fileHandle);
 
   fprintf(stderr, "\n\n");
 

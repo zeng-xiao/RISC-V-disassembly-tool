@@ -2,7 +2,7 @@
 #define SECTION_HEADER_H
 #include "elf.h"
 
-int processSectionHeader(const char *inputFileName);
+int process_section_header(const char *inputFileName);
 
 typedef struct {
   const char *i_sh_name;

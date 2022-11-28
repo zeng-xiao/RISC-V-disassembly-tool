@@ -8,7 +8,7 @@
 extern uint64_t shdrCommentOff;
 extern uint64_t shdrCommentSize;
 
-int dumpComment(const char *inputFileName) {
+int dump_comment_section(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");
 
   fprintf(stderr, "\n\n");
@@ -30,7 +30,7 @@ int dumpComment(const char *inputFileName) {
     else
       fprintf(stderr, "%c", strBuffer[charIndex]);
 
-  closeFile(fileHandle);
+  close_file(fileHandle);
 
   fprintf(stderr, "\n\n");
 

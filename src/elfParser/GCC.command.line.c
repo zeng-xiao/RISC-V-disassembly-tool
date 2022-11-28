@@ -8,7 +8,7 @@
 extern uint64_t shdrGCCcommandlineOff;
 extern uint64_t shdrGCCcommandlineSize;
 
-int dumpGCC_command_line(const char *inputFileName) {
+int dump_GCC_command_line_section(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");
 
   fprintf(stderr, "\n\n");
@@ -30,7 +30,7 @@ int dumpGCC_command_line(const char *inputFileName) {
     else
       fprintf(stderr, "%c", strBuffer[charIndex]);
 
-  closeFile(fileHandle);
+  close_file(fileHandle);
 
   fprintf(stderr, "\n\n");
 

@@ -29,7 +29,7 @@ uint64_t shdrGCCcommandlineSize = 0;
 uint64_t shdrTextOff = 0;
 uint64_t shdrTextSize = 0;
 
-static void printfElf64Header(Elf64_Info_Shdr *i_shdr) {
+static void printf_elf64_header(Elf64_Info_Shdr *i_shdr) {
   fprintf(stderr, "\n\n");
 
   fprintf(stderr, "Section Headers Info:\n");
@@ -274,7 +274,7 @@ static void sh_entsize(int shdrIndex, Elf64_Shdr *shdr,
   i_shdr[shdrIndex].i_sh_entsize = shdr[shdrIndex].sh_entsize;
 }
 
-int processSectionHeader(const char *inputFileName) {
+int process_section_header(const char *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");
 
   Elf64_Shdr shdr[shdrNumber];
@@ -300,9 +300,9 @@ int processSectionHeader(const char *inputFileName) {
   for (int shdrIndex = 0; shdrIndex < shdrNumber; shdrIndex++)
     sh_name_str(shdrIndex, shdr, i_shdr, fileHandle);
 
-  closeFile(fileHandle);
+  close_file(fileHandle);
 
-  printfElf64Header(i_shdr);
+  printf_elf64_header(i_shdr);
 
   return 0;
 }

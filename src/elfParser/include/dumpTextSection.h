@@ -4,6 +4,6 @@
 #include <stdint.h>
 
 /* functions */
-int disassembleTextSection(const uint8_t *inputFileName);
+int disassemble_text_section(const uint8_t *inputFileName);
 
 #endif

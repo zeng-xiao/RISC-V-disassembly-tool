@@ -5,5 +5,5 @@
 
 uint64_t byte_get_little_endian(const unsigned char *field, int size);
 void byte_put_little_endian(unsigned char *field, uint64_t value, int size);
-void closeFile(FILE *fileHandle);
+void close_file(FILE *fileHandle);
 #endif

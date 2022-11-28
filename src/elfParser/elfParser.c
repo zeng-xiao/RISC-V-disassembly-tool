@@ -11,25 +11,25 @@
 
 #include "dumpTextSection.h"
 
-void static dumpStr(const uint8_t *inputFileName) {
-  dumpDebug_str(inputFileName);
-  dumpComment(inputFileName);
-  dumpRiscv_attributes(inputFileName);
-  dumpGCC_command_line(inputFileName);
+void static dump_str(const uint8_t *inputFileName) {
+  dump_debug_str_section(inputFileName);
+  dump_comment_section(inputFileName);
+  dump_riscv_attributes_section(inputFileName);
+  dump_GCC_command_line_section(inputFileName);
 }
 
 int main(int argc, char **argv) {
   const char *inputFileName = argv[1];
 
-  processElfHeader(inputFileName);
-  processSectionHeader(inputFileName);
-  processProgramHeader(inputFileName);
+  process_elf_header(inputFileName);
+  process_section_header(inputFileName);
+  process_program_header(inputFileName);
 
-  dumpStr(inputFileName);
+  dump_str(inputFileName);
 
-  analysisDebugFrame(inputFileName);
+  parser_debug_frame(inputFileName);
 
-  disassembleTextSection(inputFileName);
+  disassemble_text_section(inputFileName);
 
   return 0;
 }

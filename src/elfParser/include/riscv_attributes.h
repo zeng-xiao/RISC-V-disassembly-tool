@@ -2,6 +2,6 @@
 #define RISCV_ATTRIBUTES_H
 
 /* functions */
-int dumpRiscv_attributes(const char *inputFileName);
+int dump_riscv_attributes_section(const char *inputFileName);
 
 #endif

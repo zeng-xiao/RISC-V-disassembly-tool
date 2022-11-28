@@ -2,6 +2,6 @@
 #define PROGRAM_HEADER_H
 
 /* functions */
-int processProgramHeader(const char *inputFileName);
+int process_program_header(const char *inputFileName);
 
 #endif

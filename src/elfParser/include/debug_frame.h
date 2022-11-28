@@ -2,6 +2,6 @@
 #define DEBUG_FRAME_H
 
 /* functions */
-int analysisDebugFrame(const char *inputFileName);
+int parser_debug_frame(const char *inputFileName);
 
 #endif

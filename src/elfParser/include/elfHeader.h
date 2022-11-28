@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-int processElfHeader(const uint8_t *inputFileName);
+int process_elf_header(const uint8_t *inputFileName);
 
 // This is an auxiliary data structure created by converting bytes
 // read from the outside into corresponding data sizes

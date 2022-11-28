@@ -2,6 +2,6 @@
 #define DEBUG_STR_H
 
 /* functions */
-int dumpDebug_str(const char *inputFileName);
+int dump_debug_str_section(const char *inputFileName);
 
 #endif
