@@ -478,7 +478,7 @@ typedef struct {
   uint64_t inst;
   int32_t imm;
   uint16_t op;
-  uint8_t encodingType;
+  uint8_t type;
   uint8_t rd;
   uint8_t rs1;
   uint8_t rs2;
@@ -499,7 +499,7 @@ enum { rvcd_imm_nz = 0x1, rvcd_imm_nz_hint = 0x2 };
 
 typedef struct {
   const char *const name;
-  const rv_type encodingType;
+  const rv_type type;
   const char *const format;
   const rv_compData *pseudo;
   const short decomp_rv32;
@@ -2872,8 +2872,8 @@ static uint32_t operand_cimmq(rv_inst inst) {
 
 static void rv_inst_oprands(rv_instInfo *instInfo) {
   rv_inst inst = instInfo->inst;
-  instInfo->encodingType = opcode_data[instInfo->op].encodingType;
-  switch (instInfo->encodingType) {
+  instInfo->type = opcode_data[instInfo->op].type;
+  switch (instInfo->type) {
   case type_none:
     instInfo->rd = reg_x00_f00;
     instInfo->rs1 = reg_x00_f00;
@@ -3179,7 +3179,7 @@ static void rv_inst_decompress(rv_instInfo *instInfo, rv_isa isa) {
       instInfo->op = op_illegal;
     } else {
       instInfo->op = decomp_op;
-      instInfo->encodingType = opcode_data[decomp_op].encodingType;
+      instInfo->type = opcode_data[decomp_op].type;
     }
   }
 }
@@ -3284,7 +3284,7 @@ static void rv_inst_pseudo(rv_instInfo *instInfo) {
   while (comp_data->constraints) {
     if (check_constraints(instInfo, comp_data->constraints)) {
       instInfo->op = comp_data->op;
-      instInfo->encodingType = opcode_data[instInfo->op].encodingType;
+      instInfo->type = opcode_data[instInfo->op].type;
       return;
     }
     comp_data++;
