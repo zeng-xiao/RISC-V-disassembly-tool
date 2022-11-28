@@ -28,6 +28,9 @@
                 "dumpriscvattributessection.h": "c",
                 "dumpgcccommandlinesection.h": "c",
                 "dumpdebugstrsection.h": "c",
-                "dumpelfheader.h": "c"
+                "dumpelfheader.h": "c",
+                "dataoperate.h": "c",
+                "inttypes.h": "c",
+                "stdbool.h": "c"
         }
 }
