@@ -510,13 +510,13 @@ typedef struct {
 
 /* register names */
 
-static const char rv_ireg_name_sym[32][5] = {
+static const char rv_i_reg_abi_name[32][5] = {
     "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
     "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
     "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
 };
 
-static const char rv_freg_name_sym[32][5] = {
+static const char rv_f_reg_abi_name[32][5] = {
     "ft0", "ft1", "ft2",  "ft3",  "ft4", "ft5", "ft6",  "ft7",
     "fs0", "fs1", "fa0",  "fa1",  "fa2", "fa3", "fa4",  "fa5",
     "fa6", "fa7", "fs2",  "fs3",  "fs4", "fs5", "fs6",  "fs7",
@@ -3344,25 +3344,25 @@ static void rv_inst_format(char *buf, size_t buflen, size_t tab,
       append(buf, ")", buflen);
       break;
     case '0':
-      append(buf, rv_ireg_name_sym[instInfo->rd], buflen);
+      append(buf, rv_i_reg_abi_name[instInfo->rd], buflen);
       break;
     case '1':
-      append(buf, rv_ireg_name_sym[instInfo->rs1], buflen);
+      append(buf, rv_i_reg_abi_name[instInfo->rs1], buflen);
       break;
     case '2':
-      append(buf, rv_ireg_name_sym[instInfo->rs2], buflen);
+      append(buf, rv_i_reg_abi_name[instInfo->rs2], buflen);
       break;
     case '3':
-      append(buf, rv_freg_name_sym[instInfo->rd], buflen);
+      append(buf, rv_f_reg_abi_name[instInfo->rd], buflen);
       break;
     case '4':
-      append(buf, rv_freg_name_sym[instInfo->rs1], buflen);
+      append(buf, rv_f_reg_abi_name[instInfo->rs1], buflen);
       break;
     case '5':
-      append(buf, rv_freg_name_sym[instInfo->rs2], buflen);
+      append(buf, rv_f_reg_abi_name[instInfo->rs2], buflen);
       break;
     case '6':
-      append(buf, rv_freg_name_sym[instInfo->rs3], buflen);
+      append(buf, rv_f_reg_abi_name[instInfo->rs3], buflen);
       break;
     case '7':
       snprintf(tmp, sizeof(tmp), "%d", instInfo->rs1);
