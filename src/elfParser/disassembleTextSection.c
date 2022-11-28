@@ -2925,7 +2925,7 @@ static uint32_t operand_cimmq(rv_inst inst) {
 
 /* decode operands */
 
-static void decode_inst_operands(rv_instInfo *instInfo) {
+static void rv_inst_oprands(rv_instInfo *instInfo) {
   rv_inst inst = instInfo->inst;
   instInfo->encodingType = opcode_data[instInfo->op].encodingType;
   switch (instInfo->encodingType) {
@@ -3215,7 +3215,7 @@ static void decode_inst_operands(rv_instInfo *instInfo) {
 
 /* decompress instruction */
 
-static void decode_inst_decompress(rv_instInfo *instInfo, rv_isa isa) {
+static void rv_inst_decompress(rv_instInfo *instInfo, rv_isa isa) {
   int decomp_op;
   switch (isa) {
   case rv32:
@@ -3328,7 +3328,7 @@ static bool check_constraints(rv_instInfo *instInfo, const rvc_constraint *c) {
 
 /* lift instruction to pseudo-instruction */
 
-static void rv_pseudo(rv_instInfo *instInfo) {
+static void rv_inst_pseudo(rv_instInfo *instInfo) {
   const rv_compData *comp_data = opcode_data[instInfo->op].pseudo;
   if (!comp_data) {
     return;
@@ -3357,8 +3357,8 @@ static void append(char *s1, const char *s2, ssize_t n) {
 #define INST_LEN_6 ("%012" PRIx64 "      ")
 #define INST_LEN_8 ("%016" PRIx64 "  ")
 
-static void decode_inst_format(char *buf, size_t buflen, size_t tab,
-                               rv_instInfo *instInfo) {
+static void rv_inst_format(char *buf, size_t buflen, size_t tab,
+                           rv_instInfo *instInfo) {
   char tmp[64];
   const char *fmt;
 
@@ -3532,15 +3532,15 @@ void inst_fetch(const uint8_t *data, rv_inst *instp, size_t *length) {
 
 /* disassemble instruction */
 
-static void disasm_inst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
-                        uint64_t pc) {
+static void disassemble_inst(uint8_t *buf, size_t buflen, rv_isa isa,
+                             rv_inst inst, uint64_t pc) {
   rv_instInfo dec = {.pc = pc, .inst = inst};
   rv_inst_opcode(&dec, isa);
-  decode_inst_operands(&dec);
+  rv_inst_oprands(&dec);
   // Whether to display compression instructions?
-  // decode_inst_decompress(&dec, isa);
-  rv_pseudo(&dec);
-  decode_inst_format(buf, buflen, 32, &dec);
+  // rv_inst_decompress(&dec, isa);
+  rv_inst_pseudo(&dec);
+  rv_inst_format(buf, buflen, 32, &dec);
   fprintf(stderr, "%04" PRIx64 ":  %s\n", pc, buf);
 }
 
@@ -3569,14 +3569,14 @@ int disassemble_text_section(const uint8_t *inputFileName) {
     inst = byte_get_little_endian(instBuffer, uncompressionInstLen);
 
     if (inst_length(inst) == 4) { // uncompression instruction length is 4
-      disasm_inst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
-                  shdrTextOff);
+      disassemble_inst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
+                       shdrTextOff);
       instBuffer += uncompressionInstLen;
       shdrTextOff += uncompressionInstLen;
     } else if (inst_length(inst) == 2) { // compression instruction length is 2
       inst = byte_get_little_endian(instBuffer, compressionInstLen);
-      disasm_inst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
-                  shdrTextOff);
+      disassemble_inst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
+                       shdrTextOff);
       instBuffer += compressionInstLen;
       shdrTextOff += compressionInstLen;
     } else { // Other instruction lengths are not supported temporarily
