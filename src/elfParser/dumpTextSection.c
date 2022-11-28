@@ -9,6 +9,13 @@
 
 #include "dataOperate.h"
 
+extern uint64_t shdrTextOff;
+extern uint64_t shdrTextSize;
+extern uint8_t riscvLen;
+
+static uint8_t compressionInstLen = 2;
+static uint8_t uncompressionInstLen = 4;
+
 /* types */
 
 typedef uint64_t rv_inst;
@@ -480,11 +487,11 @@ typedef struct {
   uint8_t succ;
   uint8_t aq;
   uint8_t rl;
-} rv_decode;
+} rv_instruction_info;
 
 /* instruction length */
 
-size_t inst_length(rv_inst inst) {
+static size_t inst_length(rv_inst inst) {
   /* NOTE: supports maximum instruction size of 64-bits */
 
   /* instruction length coding
@@ -502,19 +509,6 @@ size_t inst_length(rv_inst inst) {
                                            : 0;
 }
 
-extern uint64_t shdrTextOff;
-extern uint64_t shdrTextSize;
-extern uint8_t riscvLen;
-
-static uint8_t compressionInstLen = 2;
-static uint8_t uncompressionInstLen = 4;
-
-static uint32_t instIndex = 0;
-
-static uint8_t immStr[20];
-
-static uint8_t outputInstStr[1024];
-
 typedef struct {
   const int op;
   const rvc_constraint *constraints;
@@ -524,7 +518,7 @@ enum { rvcd_imm_nz = 0x1, rvcd_imm_nz_hint = 0x2 };
 
 typedef struct {
   const char *const name;
-  const rv_codec codec;
+  const rv_codec encodingType;
   const char *const format;
   const rv_comp_data *pseudo;
   const short decomp_rv32;
@@ -1681,7 +1675,7 @@ static const char *csr_name(int csrno) {
 
 /* decode opcode */
 
-static void decode_inst_opcode(rv_decode *dec, rv_isa isa) {
+static void decode_inst_opcode(rv_instruction_info *dec, rv_isa isa) {
   rv_inst inst = dec->inst;
   rv_opcode op = rv_op_illegal;
   switch (((inst >> 0) & 0b11)) {
@@ -2930,9 +2924,9 @@ static uint32_t operand_cimmq(rv_inst inst) {
 
 /* decode operands */
 
-static void decode_inst_operands(rv_decode *dec) {
+static void decode_inst_operands(rv_instruction_info *dec) {
   rv_inst inst = dec->inst;
-  dec->encodingType = opcode_data[dec->op].codec;
+  dec->encodingType = opcode_data[dec->op].encodingType;
   switch (dec->encodingType) {
   case rv_encodingType_none:
     dec->rd = rv_ireg_zero;
@@ -3220,7 +3214,7 @@ static void decode_inst_operands(rv_decode *dec) {
 
 /* decompress instruction */
 
-static void decode_inst_decompress(rv_decode *dec, rv_isa isa) {
+static void decode_inst_decompress(rv_instruction_info *dec, rv_isa isa) {
   int decomp_op;
   switch (isa) {
   case rv32:
@@ -3238,14 +3232,15 @@ static void decode_inst_decompress(rv_decode *dec, rv_isa isa) {
       dec->op = rv_op_illegal;
     } else {
       dec->op = decomp_op;
-      dec->encodingType = opcode_data[decomp_op].codec;
+      dec->encodingType = opcode_data[decomp_op].encodingType;
     }
   }
 }
 
 /* check constraint */
 
-static bool check_constraints(rv_decode *dec, const rvc_constraint *c) {
+static bool check_constraints(rv_instruction_info *dec,
+                              const rvc_constraint *c) {
   int32_t imm = dec->imm;
   uint8_t rd = dec->rd, rs1 = dec->rs1, rs2 = dec->rs2;
   while (*c != rvc_end) {
@@ -3332,7 +3327,7 @@ static bool check_constraints(rv_decode *dec, const rvc_constraint *c) {
 
 /* lift instruction to pseudo-instruction */
 
-static void decode_inst_lift_pseudo(rv_decode *dec) {
+static void decode_inst_lift_pseudo(rv_instruction_info *dec) {
   const rv_comp_data *comp_data = opcode_data[dec->op].pseudo;
   if (!comp_data) {
     return;
@@ -3340,7 +3335,7 @@ static void decode_inst_lift_pseudo(rv_decode *dec) {
   while (comp_data->constraints) {
     if (check_constraints(dec, comp_data->constraints)) {
       dec->op = comp_data->op;
-      dec->encodingType = opcode_data[dec->op].codec;
+      dec->encodingType = opcode_data[dec->op].encodingType;
       return;
     }
     comp_data++;
@@ -3362,7 +3357,7 @@ static void append(char *s1, const char *s2, ssize_t n) {
 #define INST_FMT_8 "%016" PRIx64 "  "
 
 static void decode_inst_format(char *buf, size_t buflen, size_t tab,
-                               rv_decode *dec) {
+                               rv_instruction_info *dec) {
   char tmp[64];
   const char *fmt;
 
@@ -3538,7 +3533,7 @@ void inst_fetch(const uint8_t *data, rv_inst *instp, size_t *length) {
 
 void disasmInst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
                 uint64_t pc) {
-  rv_decode dec = {.inst = inst};
+  rv_instruction_info dec = {.inst = inst};
   decode_inst_opcode(&dec, isa);
   decode_inst_operands(&dec);
   // Whether to display compression instructions
