@@ -3509,7 +3509,7 @@ void disasmInst(char *buf, size_t buflen, rv_isa isa, rv_inst inst,
   decode_inst_decompress(&dec, isa);
   decode_inst_lift_pseudo(&dec);
   decode_inst_format(buf, buflen, 32, &dec);
-  printf("%016" PRIx64 ":  %s\n", pc, buf);
+  fprintf(stderr, "%04" PRIx64 ":  %s\n", pc, buf);
 }
 
 int disassembleTextSection(const uint8_t *inputFileName) {
