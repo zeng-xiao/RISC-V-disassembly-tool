@@ -3351,10 +3351,10 @@ static void append(char *s1, const char *s2, ssize_t n) {
   }
 }
 
-#define INST_FMT_2 "%04" PRIx64 "              "
-#define INST_FMT_4 "%08" PRIx64 "          "
-#define INST_FMT_6 "%012" PRIx64 "      "
-#define INST_FMT_8 "%016" PRIx64 "  "
+#define INST_LEN_2 ("%04h" PRIx16 "              ")
+#define INST_LEN_4 ("%08h" PRIx32 "          ")
+#define INST_LEN_6 ("%012" PRIx64 "      ")
+#define INST_LEN_8 ("%016" PRIx64 "  ")
 
 static void decode_inst_format(char *buf, size_t buflen, size_t tab,
                                rv_instInfo *instInfo) {
@@ -3364,16 +3364,16 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab,
   size_t len = inst_length(instInfo->inst);
   switch (len) {
   case 2:
-    snprintf(buf, buflen, INST_FMT_2, instInfo->inst);
+    snprintf(buf, buflen, INST_LEN_2, (int16_t)instInfo->inst);
     break;
   case 4:
-    snprintf(buf, buflen, INST_FMT_4, instInfo->inst);
+    snprintf(buf, buflen, INST_LEN_4, (int32_t)instInfo->inst);
     break;
   case 6:
-    snprintf(buf, buflen, INST_FMT_6, instInfo->inst);
+    snprintf(buf, buflen, INST_LEN_6, instInfo->inst);
     break;
   default:
-    snprintf(buf, buflen, INST_FMT_8, instInfo->inst);
+    snprintf(buf, buflen, INST_LEN_8, (int64_t)instInfo->inst);
     break;
   }
 
@@ -3571,7 +3571,7 @@ int disassembleTextSection(const uint8_t *inputFileName) {
                  uncompressionInst, shdrTextOff + compressionInstLen);
       instBuffer += uncompressionInstLen;
     } else {
-      int32_t compressionInst =
+      int16_t compressionInst =
           byte_get_little_endian(instBuffer, compressionInstLen);
       disasmInst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32,
                  compressionInst, shdrTextOff + compressionInstLen);
