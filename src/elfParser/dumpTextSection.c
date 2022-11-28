@@ -147,7 +147,7 @@ typedef enum {
   rv_encodingType_css_swsp,
   rv_encodingType_css_sdsp,
   rv_encodingType_css_sqsp,
-} rv_codec;
+} rv_encodingType;
 
 typedef enum {
   rv_op_illegal,
@@ -489,43 +489,23 @@ typedef struct {
   uint8_t rl;
 } rv_instInfo;
 
-/* instruction length */
-
-static size_t inst_length(rv_inst inst) {
-  /* NOTE: supports maximum instruction size of 64-bits */
-
-  /* instruction length coding standard
-   *
-   *      aa - 16 bit aa != 11
-   *   bbb11 - 32 bit bbb != 111
-   *  011111 - 48 bit
-   * 0111111 - 64 bit
-   */
-
-  return (inst & 0b11) != 0b11             ? 2
-         : (inst & 0b11100) != 0b11100     ? 4
-         : (inst & 0b111111) == 0b011111   ? 6
-         : (inst & 0b1111111) == 0b0111111 ? 8
-                                           : 0;
-}
-
 typedef struct {
   const int op;
   const rvc_constraint *constraints;
-} rv_comp_data;
+} rv_compData;
 
 enum { rvcd_imm_nz = 0x1, rvcd_imm_nz_hint = 0x2 };
 
 typedef struct {
   const char *const name;
-  const rv_codec encodingType;
+  const rv_encodingType encodingType;
   const char *const format;
-  const rv_comp_data *pseudo;
+  const rv_compData *pseudo;
   const short decomp_rv32;
   const short decomp_rv64;
   const short decomp_rv128;
   const short decomp_data;
-} rv_opcode_data;
+} rv_opcodeData;
 
 /* register names */
 
@@ -625,108 +605,108 @@ static const rvc_constraint rvcc_fsflagsi[] = {rvc_csr_eq_0x001, rvc_end};
 
 /* pseudo-instruction metadata */
 
-static const rv_comp_data rvcp_jal[] = {
+static const rv_compData rvcp_jal[] = {
     {rv_op_j, rvcc_jal_j}, {rv_op_jal, rvcc_jal_jal}, {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_jalr[] = {{rv_op_ret, rvcc_jalr_ret},
-                                         {rv_op_jr, rvcc_jalr_jr},
-                                         {rv_op_jalr, rvcc_jalr_jalr},
-                                         {rv_op_illegal, NULL}};
-
-static const rv_comp_data rvcp_beq[] = {{rv_op_beqz, rvcc_rs2_eq_x0},
+static const rv_compData rvcp_jalr[] = {{rv_op_ret, rvcc_jalr_ret},
+                                        {rv_op_jr, rvcc_jalr_jr},
+                                        {rv_op_jalr, rvcc_jalr_jalr},
                                         {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_bne[] = {{rv_op_bnez, rvcc_rs2_eq_x0},
+static const rv_compData rvcp_beq[] = {{rv_op_beqz, rvcc_rs2_eq_x0},
+                                       {rv_op_illegal, NULL}};
+
+static const rv_compData rvcp_bne[] = {{rv_op_bnez, rvcc_rs2_eq_x0},
+                                       {rv_op_illegal, NULL}};
+
+static const rv_compData rvcp_blt[] = {{rv_op_bltz, rvcc_rs2_eq_x0},
+                                       {rv_op_bgtz, rvcc_rs1_eq_x0},
+                                       {rv_op_bgt, rvcc_last},
+                                       {rv_op_illegal, NULL}};
+
+static const rv_compData rvcp_bge[] = {{rv_op_blez, rvcc_rs1_eq_x0},
+                                       {rv_op_bgez, rvcc_rs2_eq_x0},
+                                       {rv_op_ble, rvcc_last},
+                                       {rv_op_illegal, NULL}};
+
+static const rv_compData rvcp_bltu[] = {{rv_op_bgtu, rvcc_last},
                                         {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_blt[] = {{rv_op_bltz, rvcc_rs2_eq_x0},
-                                        {rv_op_bgtz, rvcc_rs1_eq_x0},
-                                        {rv_op_bgt, rvcc_last},
+static const rv_compData rvcp_bgeu[] = {{rv_op_bleu, rvcc_last},
                                         {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_bge[] = {{rv_op_blez, rvcc_rs1_eq_x0},
-                                        {rv_op_bgez, rvcc_rs2_eq_x0},
-                                        {rv_op_ble, rvcc_last},
+static const rv_compData rvcp_addi[] = {{rv_op_nop, rvcc_addi_nop},
+                                        {rv_op_mv, rvcc_imm_eq_zero},
                                         {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_bltu[] = {{rv_op_bgtu, rvcc_last},
+static const rv_compData rvcp_sltiu[] = {{rv_op_seqz, rvcc_imm_eq_p1},
                                          {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_bgeu[] = {{rv_op_bleu, rvcc_last},
-                                         {rv_op_illegal, NULL}};
-
-static const rv_comp_data rvcp_addi[] = {{rv_op_nop, rvcc_addi_nop},
-                                         {rv_op_mv, rvcc_imm_eq_zero},
-                                         {rv_op_illegal, NULL}};
-
-static const rv_comp_data rvcp_sltiu[] = {{rv_op_seqz, rvcc_imm_eq_p1},
-                                          {rv_op_illegal, NULL}};
-
-static const rv_comp_data rvcp_xori[] = {{rv_op_not, rvcc_imm_eq_n1},
-                                         {rv_op_illegal, NULL}};
-
-static const rv_comp_data rvcp_sub[] = {{rv_op_neg, rvcc_rs1_eq_x0},
+static const rv_compData rvcp_xori[] = {{rv_op_not, rvcc_imm_eq_n1},
                                         {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_slt[] = {{rv_op_sltz, rvcc_rs2_eq_x0},
-                                        {rv_op_sgtz, rvcc_rs1_eq_x0},
+static const rv_compData rvcp_sub[] = {{rv_op_neg, rvcc_rs1_eq_x0},
+                                       {rv_op_illegal, NULL}};
+
+static const rv_compData rvcp_slt[] = {{rv_op_sltz, rvcc_rs2_eq_x0},
+                                       {rv_op_sgtz, rvcc_rs1_eq_x0},
+                                       {rv_op_illegal, NULL}};
+
+static const rv_compData rvcp_sltu[] = {{rv_op_snez, rvcc_rs1_eq_x0},
                                         {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_sltu[] = {{rv_op_snez, rvcc_rs1_eq_x0},
+static const rv_compData rvcp_addiw[] = {{rv_op_sext_w, rvcc_imm_eq_zero},
                                          {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_addiw[] = {{rv_op_sext_w, rvcc_imm_eq_zero},
-                                          {rv_op_illegal, NULL}};
+static const rv_compData rvcp_subw[] = {{rv_op_negw, rvcc_rs1_eq_x0},
+                                        {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_subw[] = {{rv_op_negw, rvcc_rs1_eq_x0},
+static const rv_compData rvcp_csrrw[] = {{rv_op_fscsr, rvcc_fscsr},
+                                         {rv_op_fsrm, rvcc_fsrm},
+                                         {rv_op_fsflags, rvcc_fsflags},
                                          {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_csrrw[] = {{rv_op_fscsr, rvcc_fscsr},
-                                          {rv_op_fsrm, rvcc_fsrm},
-                                          {rv_op_fsflags, rvcc_fsflags},
-                                          {rv_op_illegal, NULL}};
-
-static const rv_comp_data rvcp_csrrs[] = {
+static const rv_compData rvcp_csrrs[] = {
     {rv_op_rdcycle, rvcc_rdcycle},     {rv_op_rdtime, rvcc_rdtime},
     {rv_op_rdinstret, rvcc_rdinstret}, {rv_op_rdcycleh, rvcc_rdcycleh},
     {rv_op_rdtimeh, rvcc_rdtimeh},     {rv_op_rdinstreth, rvcc_rdinstreth},
     {rv_op_frcsr, rvcc_frcsr},         {rv_op_frrm, rvcc_frrm},
     {rv_op_frflags, rvcc_frflags},     {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_csrrwi[] = {{rv_op_fsrmi, rvcc_fsrmi},
-                                           {rv_op_fsflagsi, rvcc_fsflagsi},
+static const rv_compData rvcp_csrrwi[] = {{rv_op_fsrmi, rvcc_fsrmi},
+                                          {rv_op_fsflagsi, rvcc_fsflagsi},
+                                          {rv_op_illegal, NULL}};
+
+static const rv_compData rvcp_fsgnj_s[] = {{rv_op_fmv_s, rvcc_rs2_eq_rs1},
                                            {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_fsgnj_s[] = {{rv_op_fmv_s, rvcc_rs2_eq_rs1},
+static const rv_compData rvcp_fsgnjn_s[] = {{rv_op_fneg_s, rvcc_rs2_eq_rs1},
                                             {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_fsgnjn_s[] = {{rv_op_fneg_s, rvcc_rs2_eq_rs1},
-                                             {rv_op_illegal, NULL}};
-
-static const rv_comp_data rvcp_fsgnjx_s[] = {{rv_op_fabs_s, rvcc_rs2_eq_rs1},
-                                             {rv_op_illegal, NULL}};
-
-static const rv_comp_data rvcp_fsgnj_d[] = {{rv_op_fmv_d, rvcc_rs2_eq_rs1},
+static const rv_compData rvcp_fsgnjx_s[] = {{rv_op_fabs_s, rvcc_rs2_eq_rs1},
                                             {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_fsgnjn_d[] = {{rv_op_fneg_d, rvcc_rs2_eq_rs1},
-                                             {rv_op_illegal, NULL}};
+static const rv_compData rvcp_fsgnj_d[] = {{rv_op_fmv_d, rvcc_rs2_eq_rs1},
+                                           {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_fsgnjx_d[] = {{rv_op_fabs_d, rvcc_rs2_eq_rs1},
-                                             {rv_op_illegal, NULL}};
-
-static const rv_comp_data rvcp_fsgnj_q[] = {{rv_op_fmv_q, rvcc_rs2_eq_rs1},
+static const rv_compData rvcp_fsgnjn_d[] = {{rv_op_fneg_d, rvcc_rs2_eq_rs1},
                                             {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_fsgnjn_q[] = {{rv_op_fneg_q, rvcc_rs2_eq_rs1},
-                                             {rv_op_illegal, NULL}};
+static const rv_compData rvcp_fsgnjx_d[] = {{rv_op_fabs_d, rvcc_rs2_eq_rs1},
+                                            {rv_op_illegal, NULL}};
 
-static const rv_comp_data rvcp_fsgnjx_q[] = {{rv_op_fabs_q, rvcc_rs2_eq_rs1},
-                                             {rv_op_illegal, NULL}};
+static const rv_compData rvcp_fsgnj_q[] = {{rv_op_fmv_q, rvcc_rs2_eq_rs1},
+                                           {rv_op_illegal, NULL}};
+
+static const rv_compData rvcp_fsgnjn_q[] = {{rv_op_fneg_q, rvcc_rs2_eq_rs1},
+                                            {rv_op_illegal, NULL}};
+
+static const rv_compData rvcp_fsgnjx_q[] = {{rv_op_fabs_q, rvcc_rs2_eq_rs1},
+                                            {rv_op_illegal, NULL}};
 
 /* instruction metadata */
 
-const rv_opcode_data opcode_data[] = {
+const rv_opcodeData opcode_data[] = {
     {"illegal", rv_encodingType_illegal, rv_fmt_none, NULL, 0, 0, 0},
     {"lui", rv_encodingType_u, rv_fmt_rd_imm, NULL, 0, 0, 0},
     {"auipc", rv_encodingType_u, rv_fmt_rd_offset, NULL, 0, 0, 0},
@@ -1109,6 +1089,26 @@ const rv_opcode_data opcode_data[] = {
     {"fsrmi", rv_encodingType_i_csr, rv_fmt_rd_zimm, NULL, 0, 0, 0},
     {"fsflagsi", rv_encodingType_i_csr, rv_fmt_rd_zimm, NULL, 0, 0, 0},
 };
+
+/* instruction length */
+
+static size_t inst_length(rv_inst inst) {
+  /* NOTE: supports maximum instruction size of 64-bits */
+
+  /* instruction length coding standard
+   *
+   *      aa - 16 bit aa != 11
+   *   bbb11 - 32 bit bbb != 111
+   *  011111 - 48 bit
+   * 0111111 - 64 bit
+   */
+
+  return (inst & 0b11) != 0b11             ? 2
+         : (inst & 0b11100) != 0b11100     ? 4
+         : (inst & 0b111111) == 0b011111   ? 6
+         : (inst & 0b1111111) == 0b0111111 ? 8
+                                           : 0;
+}
 
 /* CSR names */
 
@@ -3328,7 +3328,7 @@ static bool check_constraints(rv_instInfo *instInfo, const rvc_constraint *c) {
 /* lift instruction to pseudo-instruction */
 
 static void decode_inst_lift_pseudo(rv_instInfo *instInfo) {
-  const rv_comp_data *comp_data = opcode_data[instInfo->op].pseudo;
+  const rv_compData *comp_data = opcode_data[instInfo->op].pseudo;
   if (!comp_data) {
     return;
   }
