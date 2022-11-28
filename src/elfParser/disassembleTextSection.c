@@ -1674,9 +1674,9 @@ static const char *csr_name(int csrno) {
   }
 }
 
-/* decode opcode */
+/* Parse opcode of all riscv instructions */
 
-static void decode_inst_opcode(rv_instInfo *instInfo, rv_isa isa) {
+static void rv_inst_opcode(rv_instInfo *instInfo, rv_isa isa) {
   rv_inst inst = instInfo->inst;
   rv_opcode op = rv_op_illegal;
   switch (((inst >> 0) & 0b11)) {
@@ -3328,7 +3328,7 @@ static bool check_constraints(rv_instInfo *instInfo, const rvc_constraint *c) {
 
 /* lift instruction to pseudo-instruction */
 
-static void decode_inst_lift_pseudo(rv_instInfo *instInfo) {
+static void rv_pseudo(rv_instInfo *instInfo) {
   const rv_compData *comp_data = opcode_data[instInfo->op].pseudo;
   if (!comp_data) {
     return;
@@ -3535,16 +3535,18 @@ void inst_fetch(const uint8_t *data, rv_inst *instp, size_t *length) {
 static void disasm_inst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
                         uint64_t pc) {
   rv_instInfo dec = {.pc = pc, .inst = inst};
-  decode_inst_opcode(&dec, isa);
+  rv_inst_opcode(&dec, isa);
   decode_inst_operands(&dec);
-  // Whether to display compression instructions
+  // Whether to display compression instructions?
   // decode_inst_decompress(&dec, isa);
-  decode_inst_lift_pseudo(&dec);
+  rv_pseudo(&dec);
   decode_inst_format(buf, buflen, 32, &dec);
   fprintf(stderr, "%04" PRIx64 ":  %s\n", pc, buf);
 }
 
 int disassemble_text_section(const uint8_t *inputFileName) {
+  int32_t inst;
+
   FILE *fileHandle = fopen(inputFileName, "rb");
 
   fprintf(stderr, "\n\n");
@@ -3564,20 +3566,20 @@ int disassemble_text_section(const uint8_t *inputFileName) {
   while (instBuffer != instBufferEnd) {
     uint8_t buf[80] = {0};
 
-    int32_t inst = byte_get_little_endian(instBuffer, uncompressionInstLen);
+    inst = byte_get_little_endian(instBuffer, uncompressionInstLen);
 
-    if (inst_length(inst) == 4) {
+    if (inst_length(inst) == 4) { // uncompression instruction length is 4
       disasm_inst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
                   shdrTextOff);
       instBuffer += uncompressionInstLen;
       shdrTextOff += uncompressionInstLen;
-    } else if (inst_length(inst) == 2) {
+    } else if (inst_length(inst) == 2) { // compression instruction length is 2
       inst = byte_get_little_endian(instBuffer, compressionInstLen);
       disasm_inst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
                   shdrTextOff);
       instBuffer += compressionInstLen;
       shdrTextOff += compressionInstLen;
-    } else {
+    } else { // Other instruction lengths are not supported temporarily
       fprintf(stderr, "instruction length is error!\n\n");
     }
   }
