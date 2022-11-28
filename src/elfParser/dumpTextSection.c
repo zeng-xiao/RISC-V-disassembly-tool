@@ -474,6 +474,7 @@ typedef enum {
 /* structures */
 
 typedef struct {
+  uint64_t pc;
   uint64_t inst;
   int32_t imm;
   uint16_t op;
@@ -3352,7 +3353,7 @@ static void append(char *s1, const char *s2, ssize_t n) {
 }
 
 #define INST_LEN_2 ("%04h" PRIx16 "              ")
-#define INST_LEN_4 ("%08h" PRIx32 "          ")
+#define INST_LEN_4 ("%08" PRIx32 "          ")
 #define INST_LEN_6 ("%012" PRIx64 "      ")
 #define INST_LEN_8 ("%016" PRIx64 "  ")
 
@@ -3427,7 +3428,7 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab,
       while (strlen(buf) < tab * 2) {
         append(buf, " ", buflen);
       }
-      snprintf(tmp, sizeof(tmp), "# 0x%x" PRIx64, instInfo->imm);
+      snprintf(tmp, sizeof(tmp), "# 0x%" PRIx64, instInfo->pc + instInfo->imm);
       append(buf, tmp, buflen);
       break;
     case 'c': {
@@ -3531,9 +3532,9 @@ void inst_fetch(const uint8_t *data, rv_inst *instp, size_t *length) {
 
 /* disassemble instruction */
 
-void disasmInst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
-                uint64_t pc) {
-  rv_instInfo dec = {.inst = inst};
+static void disasmInst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
+                       uint64_t pc) {
+  rv_instInfo dec = {.pc = pc, .inst = inst};
   decode_inst_opcode(&dec, isa);
   decode_inst_operands(&dec);
   // Whether to display compression instructions
@@ -3563,19 +3564,21 @@ int disassembleTextSection(const uint8_t *inputFileName) {
   while (instBuffer != instBufferEnd) {
     uint8_t buf[80] = {0};
 
-    int32_t uncompressionInst =
-        byte_get_little_endian(instBuffer, uncompressionInstLen);
+    int32_t inst = byte_get_little_endian(instBuffer, uncompressionInstLen);
 
-    if (!(~uncompressionInst & 0b11)) {
-      disasmInst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32,
-                 uncompressionInst, shdrTextOff + compressionInstLen);
+    if (inst_length(inst) == 4) {
+      disasmInst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
+                 shdrTextOff);
       instBuffer += uncompressionInstLen;
-    } else {
-      int16_t compressionInst =
-          byte_get_little_endian(instBuffer, compressionInstLen);
-      disasmInst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32,
-                 compressionInst, shdrTextOff + compressionInstLen);
+      shdrTextOff += uncompressionInstLen;
+    } else if (inst_length(inst) == 2) {
+      inst = byte_get_little_endian(instBuffer, compressionInstLen);
+      disasmInst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32, inst,
+                 shdrTextOff);
       instBuffer += compressionInstLen;
+      shdrTextOff += compressionInstLen;
+    } else {
+      fprintf(stderr, "instruction length is error!\n\n");
     }
   }
 
