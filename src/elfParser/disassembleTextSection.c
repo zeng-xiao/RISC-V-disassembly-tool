@@ -3296,9 +3296,9 @@ static void rv_inst_pseudo(rv_instInfo *instInfo) {
 /* format instruction */
 
 static void append(char *s1, const char *s2, size_t n) {
-  size_t l1 = strlen(s1);
-  if (n - l1 - 1 > 0) {
-    strncat(s1, s2, n - l1);
+  size_t s1Len = strlen(s1);
+  if (n - s1Len - 1 > 0) {
+    strncat(s1, s2, n - s1Len);
   }
 }
 
