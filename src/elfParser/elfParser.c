@@ -2,14 +2,14 @@
 #include "programHeader.h"
 #include "sectionHeader.h"
 
-#include "GCC.command.line.h"
 #include "comment.h"
-#include "debug_str.h"
-#include "riscv_attributes.h"
+#include "dumpDebugStr.h"
+#include "dumpGCCCommandLine.h"
+#include "dumpRiscvAttributes.h"
 
-#include "debug_frame.h"
+#include "dumpDebugFrame.h"
 
-#include "dumpTextSection.h"
+#include "disassembleTextSection.h"
 
 void static dump_str(const uint8_t *inputFileName) {
   dump_debug_str_section(inputFileName);

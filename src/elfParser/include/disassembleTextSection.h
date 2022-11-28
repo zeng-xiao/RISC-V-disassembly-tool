@@ -1,5 +1,5 @@
-#ifndef DUMP_TEXT_SECTION_H
-#define DUMP_TEXT_SECTION_H
+#ifndef DISASSEMBLE_TEXT_SECTION_H
+#define DISASSEMBLE_TEXT_SECTION_H
 
 #include <stdint.h>
 

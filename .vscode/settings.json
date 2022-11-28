@@ -21,6 +21,7 @@
                 "sectionheader.h": "c",
                 "riscv_attributes.h": "c",
                 "debug_frame.h": "c",
-                "stdio.h": "c"
+                "stdio.h": "c",
+                "dumpdebugframe.h": "c"
         }
 }
