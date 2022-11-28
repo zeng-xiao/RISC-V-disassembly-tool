@@ -22,6 +22,12 @@
                 "riscv_attributes.h": "c",
                 "debug_frame.h": "c",
                 "stdio.h": "c",
-                "dumpdebugframe.h": "c"
+                "dumpdebugframe.h": "c",
+                "disassembletextsection.h": "c",
+                "dumpdebugframesection.h": "c",
+                "dumpriscvattributessection.h": "c",
+                "dumpgcccommandlinesection.h": "c",
+                "dumpdebugstrsection.h": "c",
+                "dumpelfheader.h": "c"
         }
 }

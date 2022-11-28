@@ -2,12 +2,12 @@
 #include "programHeader.h"
 #include "sectionHeader.h"
 
-#include "comment.h"
-#include "dumpDebugStr.h"
-#include "dumpGCCCommandLine.h"
-#include "dumpRiscvAttributes.h"
+#include "dumpCommentSection.h"
+#include "dumpDebugStrSection.h"
+#include "dumpGCCCommandLineSection.h"
+#include "dumpRiscvAttributesSection.h"
 
-#include "dumpDebugFrame.h"
+#include "dumpDebugFrameSection.h"
 
 #include "disassembleTextSection.h"
 
