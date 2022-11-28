@@ -3501,105 +3501,16 @@ void inst_fetch(const uint8_t *data, rv_inst *instp, size_t *length) {
 
 /* disassemble instruction */
 
-void disasmInst(char *buf, size_t buflen, rv_isa isa, rv_inst inst) {
+void disasmInst(char *buf, size_t buflen, rv_isa isa, rv_inst inst,
+                uint64_t pc) {
   rv_decode dec = {.inst = inst};
   decode_inst_opcode(&dec, isa);
   decode_inst_operands(&dec);
   decode_inst_decompress(&dec, isa);
   decode_inst_lift_pseudo(&dec);
   decode_inst_format(buf, buflen, 32, &dec);
+  printf("%016" PRIx64 ":  %s\n", pc, buf);
 }
-
-// static void decode(int32_t instruction, bool isUncompressionInst) {
-//   const uint8_t *instStr;
-
-//   if (isUncompressionInst) {
-//     uint8_t opcode = instruction & 0b1111111;
-//     int32_t instNoOpcode = instruction >> 7;
-
-//     switch (opcode) {
-//     case 0b0110011: // rv32/64 R Type
-//       instStr = rTypeInst(instNoOpcode, opcode);
-//       break;
-//     case 0b1000011: // rv32/64 R4 Type
-//     case 0b1000111: // rv32/64 R4 Type
-//     case 0b1001011: // rv32/64 R4 Type
-//     case 0b1001111: // rv32/64 R4 Type
-//       instStr = r4TypeInst(instNoOpcode, opcode);
-//       break;
-//     case 0b1010011: // rv32/64 R4 Type
-//       instStr = rTypeFaddsInst(instNoOpcode, opcode);
-//       break;
-//     case 0b0111011: // rv64 R Type addw subw sllw srlw sraw + RV64M
-//       instStr = rv64rTypeInst(instNoOpcode, opcode);
-//       break;
-//     case 0b0101111: // rv64 R Type RV64A
-//       instStr = rv64rTypeAInst(instNoOpcode, opcode);
-//       break;
-
-//     case 0b1100111: // rv32/64 I Type 1
-//       instStr = iTypeJalrInst(instNoOpcode, opcode);
-//       break;
-//     case 0b0000011: // rv32/64 I Type 2 + rv64I Type: lwu ld
-//       instStr = iTypeLbInst(instNoOpcode, opcode);
-//       break;
-//     case 0b0010011: // rv32/64 I Type 3
-//       instStr = iTypeAddiInst(instNoOpcode, opcode);
-//       break;
-//     case 0b0001111: // rv32/64 I Type 4
-//       instStr = iTypeFenceInst(instNoOpcode, opcode);
-//       break;
-//     case 0b1110011: // rv32/64 I Type 5
-//       instStr = iTypeEcallInst(instNoOpcode, opcode);
-//       break;
-//     case 0b0000111: // rv32 I Type flw
-//       instStr = rv64iTypeFlwInst(instNoOpcode, opcode);
-//       break;
-//     case 0b0011011: // rv64I Type: addiw slliw srliw sraiw
-//       instStr = rv64iTypeInst(instNoOpcode, opcode);
-//       break;
-
-//     case 0b0100011: // rv32/64 S Type
-//       instStr = sTypeInst(instNoOpcode, opcode);
-//       break;
-//     case 0b0100111: // rv32 S Type fsw
-//       instStr = rv32sTypeFswInst(instNoOpcode, opcode);
-//       break;
-
-//     case 0b1100011: // rv32/64 B Type
-//       instStr = bTypeInst(instNoOpcode, opcode);
-//       break;
-
-//     case 0b0110111: // rv32/64 U Type
-//     case 0b0010111:
-//       instStr = uTypeInst(instNoOpcode, opcode);
-//       break;
-
-//     case 0b1101111: // rv32/64 J Type
-//       instStr = jTypeInst(instNoOpcode, opcode);
-//       break;
-
-//     default:
-//       fprintf(stderr, "[18] Invalid instruction: %x\n", instruction);
-//       abort();
-//     }
-
-//   } else {
-//   }
-
-//   fprintf(stderr, "%04x:     %08x    %s\n", instIndex, instruction, instStr);
-
-//   if (isUncompressionInst)
-//     instIndex += uncompressionInstLen;
-//   else
-//     instIndex += compressionInstLen;
-
-//   /* The strcat function appends a copy of the string pointed to by s2
-//   (including the terminating null character) to the end of the string pointed
-//   to by s1. The initial character of s2 overwrites the null character at the
-//   end of s1. */
-//   outputInstStr[0] = '\0';
-// }
 
 int disassembleTextSection(const uint8_t *inputFileName) {
   FILE *fileHandle = fopen(inputFileName, "rb");
@@ -3619,15 +3530,20 @@ int disassembleTextSection(const uint8_t *inputFileName) {
     fread(instBuffer, 1, shdrTextSize, fileHandle);
 
   while (instBuffer != instBufferEnd) {
-    int32_t instruction =
+    char buf[80] = {0};
+
+    int32_t uncompressionInst =
         byte_get_little_endian(instBuffer, uncompressionInstLen);
 
-    char buf[80] = {0};
-    if (!(~instruction & 3LL)) {
-      disasmInst(buf, sizeof(buf), rv64, instruction);
+    if (!(~uncompressionInst & 0b11)) {
+      disasmInst(buf, sizeof(buf), rv64, uncompressionInst,
+                 shdrTextOff + compressionInstLen);
       instBuffer += uncompressionInstLen;
     } else {
-      disasmInst(buf, sizeof(buf), rv64, instruction);
+      int32_t compressionInst =
+          byte_get_little_endian(instBuffer, compressionInstLen);
+      disasmInst(buf, sizeof(buf), rv64, compressionInst,
+                 shdrTextOff + compressionInstLen);
       instBuffer += compressionInstLen;
     }
   }
