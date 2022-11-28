@@ -12,6 +12,7 @@ uint64_t shdrAddress;     /* Section header table file offset */
 uint16_t shdrNumber;      /* Section header table entry count */
 uint16_t shdrSize;        /* Section header table entry size */
 uint16_t shdrStrtabIndex; /* Section header table entry size */
+uint8_t riscvLen;         /* Section header table entry size */
 
 static int ehdrIdent(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
   strcpy(elfInfo->i_ident, ehdr->e_ident);
@@ -20,11 +21,13 @@ static int ehdrIdent(Elf64_Ehdr *ehdr, Elf64_Info_Ehdr *elfInfo) {
       ehdr->e_ident[EI_MAG2] != ELFMAG2 || ehdr->e_ident[EI_MAG3] != ELFMAG3)
     return false;
 
-  if (ehdr->e_ident[EI_CLASS] == ELFCLASS32)
+  if (ehdr->e_ident[EI_CLASS] == ELFCLASS32) {
     elfInfo->i_class = "ELF32";
-  else if (ehdr->e_ident[EI_CLASS] == ELFCLASS64)
+    riscvLen = 32;
+  } else if (ehdr->e_ident[EI_CLASS] == ELFCLASS64) {
     elfInfo->i_class = "ELF64";
-  else
+    riscvLen = 64;
+  } else
     return false;
 
   if (ehdr->e_ident[EI_DATA] == ELFDATA2LSB)

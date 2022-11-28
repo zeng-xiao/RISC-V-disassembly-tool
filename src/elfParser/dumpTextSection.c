@@ -504,6 +504,7 @@ size_t inst_length(rv_inst inst) {
 
 extern uint64_t shdrTextOff;
 extern uint64_t shdrTextSize;
+extern uint8_t riscvLen;
 
 static uint8_t compressionInstLen = 2;
 static uint8_t uncompressionInstLen = 4;
@@ -1659,7 +1660,7 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa) {
   rv_inst inst = dec->inst;
   rv_opcode op = rv_op_illegal;
   switch (((inst >> 0) & 0b11)) {
-  case 0:
+  case 0: // compression instruction instLen=16bits
     switch (((inst >> 13) & 0b111)) {
     case 0:
       op = rv_op_c_addi4spn;
@@ -1684,7 +1685,7 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa) {
       break;
     }
     break;
-  case 1:
+  case 1: // compression instruction instLen=16bits
     switch (((inst >> 13) & 0b111)) {
     case 0:
       switch (((inst >> 2) & 0b11111111111)) {
@@ -1758,7 +1759,7 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa) {
       break;
     }
     break;
-  case 2:
+  case 2: // compression instruction instLen=16bits
     switch (((inst >> 13) & 0b111)) {
     case 0:
       op = rv_op_c_slli;
@@ -1814,7 +1815,7 @@ static void decode_inst_opcode(rv_decode *dec, rv_isa isa) {
       break;
     }
     break;
-  case 3:
+  case 3: // uncompression instruction instLen=32bits
     switch (((inst >> 2) & 0b11111)) {
     case 0:
       switch (((inst >> 12) & 0b111)) {
@@ -3501,7 +3502,7 @@ void inst_fetch(const uint8_t *data, rv_inst *instp, size_t *length) {
 
 /* disassemble instruction */
 
-void disasmInst(char *buf, size_t buflen, rv_isa isa, rv_inst inst,
+void disasmInst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
                 uint64_t pc) {
   rv_decode dec = {.inst = inst};
   decode_inst_opcode(&dec, isa);
@@ -3530,20 +3531,20 @@ int disassembleTextSection(const uint8_t *inputFileName) {
     fread(instBuffer, 1, shdrTextSize, fileHandle);
 
   while (instBuffer != instBufferEnd) {
-    char buf[80] = {0};
+    uint8_t buf[80] = {0};
 
     int32_t uncompressionInst =
         byte_get_little_endian(instBuffer, uncompressionInstLen);
 
     if (!(~uncompressionInst & 0b11)) {
-      disasmInst(buf, sizeof(buf), rv64, uncompressionInst,
-                 shdrTextOff + compressionInstLen);
+      disasmInst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32,
+                 uncompressionInst, shdrTextOff + compressionInstLen);
       instBuffer += uncompressionInstLen;
     } else {
       int32_t compressionInst =
           byte_get_little_endian(instBuffer, compressionInstLen);
-      disasmInst(buf, sizeof(buf), rv64, compressionInst,
-                 shdrTextOff + compressionInstLen);
+      disasmInst(buf, sizeof(buf), riscvLen == 64 ? rv64 : rv32,
+                 compressionInst, shdrTextOff + compressionInstLen);
       instBuffer += compressionInstLen;
     }
   }
