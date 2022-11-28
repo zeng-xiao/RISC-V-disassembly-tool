@@ -42,38 +42,38 @@ typedef enum {
 } rv_fence;
 
 typedef enum {
-  rv_ireg_zero,
-  rv_ireg_ra,
-  rv_ireg_sp,
-  rv_ireg_gp,
-  rv_ireg_tp,
-  rv_ireg_t0,
-  rv_ireg_t1,
-  rv_ireg_t2,
-  rv_ireg_s0,
-  rv_ireg_s1,
-  rv_ireg_a0,
-  rv_ireg_a1,
-  rv_ireg_a2,
-  rv_ireg_a3,
-  rv_ireg_a4,
-  rv_ireg_a5,
-  rv_ireg_a6,
-  rv_ireg_a7,
-  rv_ireg_s2,
-  rv_ireg_s3,
-  rv_ireg_s4,
-  rv_ireg_s5,
-  rv_ireg_s6,
-  rv_ireg_s7,
-  rv_ireg_s8,
-  rv_ireg_s9,
-  rv_ireg_s10,
-  rv_ireg_s11,
-  rv_ireg_t3,
-  rv_ireg_t4,
-  rv_ireg_t5,
-  rv_ireg_t6,
+  rv_reg_x00_f00,
+  rv_reg_x01_f01,
+  rv_reg_x02_f02,
+  rv_reg_x03_f03,
+  rv_reg_x04_f04,
+  rv_reg_x05_f05,
+  rv_reg_x06_f06,
+  rv_reg_x07_f07,
+  rv_reg_x08_f08,
+  rv_reg_x09_f09,
+  rv_reg_x10_f10,
+  rv_reg_x11_f11,
+  rv_reg_x12_f12,
+  rv_reg_x13_f13,
+  rv_reg_x14_f14,
+  rv_reg_x15_f15,
+  rv_reg_x16_f16,
+  rv_reg_x17_f17,
+  rv_reg_x18_f18,
+  rv_reg_x19_f19,
+  rv_reg_x20_f20,
+  rv_reg_x21_f21,
+  rv_reg_x22_f22,
+  rv_reg_x23_f23,
+  rv_reg_x24_f24,
+  rv_reg_x25_f25,
+  rv_reg_x26_f26,
+  rv_reg_x27_f27,
+  rv_reg_x28_f28,
+  rv_reg_x29_f29,
+  rv_reg_x30_f30,
+  rv_reg_x31_f31,
 } rv_ireg;
 
 typedef enum {
@@ -491,7 +491,7 @@ typedef struct {
 } rv_instInfo;
 
 typedef struct {
-  const int op;
+  const int32_t op;
   const rvc_constraint *constraints;
 } rv_compData;
 
@@ -2930,61 +2930,61 @@ static void rv_inst_oprands(rv_instInfo *instInfo) {
   instInfo->encodingType = opcode_data[instInfo->op].encodingType;
   switch (instInfo->encodingType) {
   case rv_encodingType_none:
-    instInfo->rd = rv_ireg_zero;
-    instInfo->rs1 = rv_ireg_zero;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
+    instInfo->rs1 = rv_reg_x00_f00;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = 0;
     break;
   case rv_encodingType_u:
     instInfo->rd = operand_rd(inst);
-    instInfo->rs1 = rv_ireg_zero;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs1 = rv_reg_x00_f00;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_imm20(inst);
     break;
   case rv_encodingType_uj:
     instInfo->rd = operand_rd(inst);
-    instInfo->rs1 = rv_ireg_zero;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs1 = rv_reg_x00_f00;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_jimm20(inst);
     break;
   case rv_encodingType_i:
     instInfo->rd = operand_rd(inst);
     instInfo->rs1 = operand_rs1(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_imm12(inst);
     break;
   case rv_encodingType_i_sh5:
     instInfo->rd = operand_rd(inst);
     instInfo->rs1 = operand_rs1(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_shamt5(inst);
     break;
   case rv_encodingType_i_sh6:
     instInfo->rd = operand_rd(inst);
     instInfo->rs1 = operand_rs1(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_shamt6(inst);
     break;
   case rv_encodingType_i_sh7:
     instInfo->rd = operand_rd(inst);
     instInfo->rs1 = operand_rs1(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_shamt7(inst);
     break;
   case rv_encodingType_i_csr:
     instInfo->rd = operand_rd(inst);
     instInfo->rs1 = operand_rs1(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_csr12(inst);
     break;
   case rv_encodingType_s:
-    instInfo->rd = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
     instInfo->rs1 = operand_rs1(inst);
     instInfo->rs2 = operand_rs2(inst);
     instInfo->imm = operand_simm12(inst);
     break;
   case rv_encodingType_sb:
-    instInfo->rd = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
     instInfo->rs1 = operand_rs1(inst);
     instInfo->rs2 = operand_rs2(inst);
     instInfo->imm = operand_sbimm12(inst);
@@ -3021,129 +3021,129 @@ static void rv_inst_oprands(rv_instInfo *instInfo) {
   case rv_encodingType_r_l:
     instInfo->rd = operand_rd(inst);
     instInfo->rs1 = operand_rs1(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = 0;
     instInfo->aq = operand_aq(inst);
     instInfo->rl = operand_rl(inst);
     break;
   case rv_encodingType_r_f:
-    instInfo->rd = instInfo->rs1 = instInfo->rs2 = rv_ireg_zero;
+    instInfo->rd = instInfo->rs1 = instInfo->rs2 = rv_reg_x00_f00;
     instInfo->pred = operand_pred(inst);
     instInfo->succ = operand_succ(inst);
     instInfo->imm = 0;
     break;
   case rv_encodingType_cb:
-    instInfo->rd = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
     instInfo->rs1 = operand_crs1q(inst) + 8;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmb(inst);
     break;
   case rv_encodingType_cb_imm:
     instInfo->rd = instInfo->rs1 = operand_crs1rdq(inst) + 8;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmi(inst);
     break;
   case rv_encodingType_cb_sh5:
     instInfo->rd = instInfo->rs1 = operand_crs1rdq(inst) + 8;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmsh5(inst);
     break;
   case rv_encodingType_cb_sh6:
     instInfo->rd = instInfo->rs1 = operand_crs1rdq(inst) + 8;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmsh6(inst);
     break;
   case rv_encodingType_ci:
     instInfo->rd = instInfo->rs1 = operand_crs1rd(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmi(inst);
     break;
   case rv_encodingType_ci_sh5:
     instInfo->rd = instInfo->rs1 = operand_crs1rd(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmsh5(inst);
     break;
   case rv_encodingType_ci_sh6:
     instInfo->rd = instInfo->rs1 = operand_crs1rd(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmsh6(inst);
     break;
   case rv_encodingType_ci_16sp:
-    instInfo->rd = rv_ireg_sp;
-    instInfo->rs1 = rv_ireg_sp;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rd = rv_reg_x02_f02;
+    instInfo->rs1 = rv_reg_x02_f02;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimm16sp(inst);
     break;
   case rv_encodingType_ci_lwsp:
     instInfo->rd = operand_crd(inst);
-    instInfo->rs1 = rv_ireg_sp;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs1 = rv_reg_x02_f02;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmlwsp(inst);
     break;
   case rv_encodingType_ci_ldsp:
     instInfo->rd = operand_crd(inst);
-    instInfo->rs1 = rv_ireg_sp;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs1 = rv_reg_x02_f02;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmldsp(inst);
     break;
   case rv_encodingType_ci_lqsp:
     instInfo->rd = operand_crd(inst);
-    instInfo->rs1 = rv_ireg_sp;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs1 = rv_reg_x02_f02;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmlqsp(inst);
     break;
   case rv_encodingType_ci_li:
     instInfo->rd = operand_crd(inst);
-    instInfo->rs1 = rv_ireg_zero;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs1 = rv_reg_x00_f00;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmi(inst);
     break;
   case rv_encodingType_ci_lui:
     instInfo->rd = operand_crd(inst);
-    instInfo->rs1 = rv_ireg_zero;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs1 = rv_reg_x00_f00;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmui(inst);
     break;
   case rv_encodingType_ci_none:
-    instInfo->rd = rv_ireg_zero;
-    instInfo->rs1 = rv_ireg_zero;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
+    instInfo->rs1 = rv_reg_x00_f00;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = 0;
     break;
   case rv_encodingType_ciw_4spn:
     instInfo->rd = operand_crdq(inst) + 8;
-    instInfo->rs1 = rv_ireg_sp;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs1 = rv_reg_x02_f02;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimm4spn(inst);
     break;
   case rv_encodingType_cj:
-    instInfo->rd = rv_ireg_zero;
-    instInfo->rs1 = rv_ireg_zero;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
+    instInfo->rs1 = rv_reg_x00_f00;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmj(inst);
     break;
   case rv_encodingType_cj_jal:
-    instInfo->rd = rv_ireg_ra;
-    instInfo->rs1 = rv_ireg_zero;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rd = rv_reg_x01_f01;
+    instInfo->rs1 = rv_reg_x00_f00;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmj(inst);
     break;
   case rv_encodingType_cl_lw:
     instInfo->rd = operand_crdq(inst) + 8;
     instInfo->rs1 = operand_crs1q(inst) + 8;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmw(inst);
     break;
   case rv_encodingType_cl_ld:
     instInfo->rd = operand_crdq(inst) + 8;
     instInfo->rs1 = operand_crs1q(inst) + 8;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmd(inst);
     break;
   case rv_encodingType_cl_lq:
     instInfo->rd = operand_crdq(inst) + 8;
     instInfo->rs1 = operand_crs1q(inst) + 8;
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = operand_cimmq(inst);
     break;
   case rv_encodingType_cr:
@@ -3154,19 +3154,19 @@ static void rv_inst_oprands(rv_instInfo *instInfo) {
   case rv_encodingType_cr_mv:
     instInfo->rd = operand_crd(inst);
     instInfo->rs1 = operand_crs2(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = 0;
     break;
   case rv_encodingType_cr_jalr:
-    instInfo->rd = rv_ireg_ra;
+    instInfo->rd = rv_reg_x01_f01;
     instInfo->rs1 = operand_crs1(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = 0;
     break;
   case rv_encodingType_cr_jr:
-    instInfo->rd = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
     instInfo->rs1 = operand_crs1(inst);
-    instInfo->rs2 = rv_ireg_zero;
+    instInfo->rs2 = rv_reg_x00_f00;
     instInfo->imm = 0;
     break;
   case rv_encodingType_cs:
@@ -3175,38 +3175,38 @@ static void rv_inst_oprands(rv_instInfo *instInfo) {
     instInfo->imm = 0;
     break;
   case rv_encodingType_cs_sw:
-    instInfo->rd = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
     instInfo->rs1 = operand_crs1q(inst) + 8;
     instInfo->rs2 = operand_crs2q(inst) + 8;
     instInfo->imm = operand_cimmw(inst);
     break;
   case rv_encodingType_cs_sd:
-    instInfo->rd = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
     instInfo->rs1 = operand_crs1q(inst) + 8;
     instInfo->rs2 = operand_crs2q(inst) + 8;
     instInfo->imm = operand_cimmd(inst);
     break;
   case rv_encodingType_cs_sq:
-    instInfo->rd = rv_ireg_zero;
+    instInfo->rd = rv_reg_x00_f00;
     instInfo->rs1 = operand_crs1q(inst) + 8;
     instInfo->rs2 = operand_crs2q(inst) + 8;
     instInfo->imm = operand_cimmq(inst);
     break;
   case rv_encodingType_css_swsp:
-    instInfo->rd = rv_ireg_zero;
-    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rd = rv_reg_x00_f00;
+    instInfo->rs1 = rv_reg_x02_f02;
     instInfo->rs2 = operand_crs2(inst);
     instInfo->imm = operand_cimmswsp(inst);
     break;
   case rv_encodingType_css_sdsp:
-    instInfo->rd = rv_ireg_zero;
-    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rd = rv_reg_x00_f00;
+    instInfo->rs1 = rv_reg_x02_f02;
     instInfo->rs2 = operand_crs2(inst);
     instInfo->imm = operand_cimmsdsp(inst);
     break;
   case rv_encodingType_css_sqsp:
-    instInfo->rd = rv_ireg_zero;
-    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rd = rv_reg_x00_f00;
+    instInfo->rs1 = rv_reg_x02_f02;
     instInfo->rs2 = operand_crs2(inst);
     instInfo->imm = operand_cimmsqsp(inst);
     break;
@@ -3243,7 +3243,10 @@ static void rv_inst_decompress(rv_instInfo *instInfo, rv_isa isa) {
 
 static bool check_constraints(rv_instInfo *instInfo, const rvc_constraint *c) {
   int32_t imm = instInfo->imm;
-  uint8_t rd = instInfo->rd, rs1 = instInfo->rs1, rs2 = instInfo->rs2;
+  uint8_t rd = instInfo->rd;
+  uint8_t rs1 = instInfo->rs1;
+  uint8_t rs2 = instInfo->rs2;
+
   while (*c != rvc_end) {
     switch (*c) {
     case rvc_rd_eq_ra:
