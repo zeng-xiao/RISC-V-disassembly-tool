@@ -487,14 +487,14 @@ typedef struct {
   uint8_t succ;
   uint8_t aq;
   uint8_t rl;
-} rv_instruction_info;
+} rv_instInfo;
 
 /* instruction length */
 
 static size_t inst_length(rv_inst inst) {
   /* NOTE: supports maximum instruction size of 64-bits */
 
-  /* instruction length coding
+  /* instruction length coding standard
    *
    *      aa - 16 bit aa != 11
    *   bbb11 - 32 bit bbb != 111
@@ -1675,8 +1675,8 @@ static const char *csr_name(int csrno) {
 
 /* decode opcode */
 
-static void decode_inst_opcode(rv_instruction_info *dec, rv_isa isa) {
-  rv_inst inst = dec->inst;
+static void decode_inst_opcode(rv_instInfo *instInfo, rv_isa isa) {
+  rv_inst inst = instInfo->inst;
   rv_opcode op = rv_op_illegal;
   switch (((inst >> 0) & 0b11)) {
   case 0: // compression instruction instLen=16bits
@@ -2774,7 +2774,7 @@ static void decode_inst_opcode(rv_instruction_info *dec, rv_isa isa) {
     }
     break;
   }
-  dec->op = op;
+  instInfo->op = op;
 }
 
 /* operand extractors */
@@ -2924,325 +2924,325 @@ static uint32_t operand_cimmq(rv_inst inst) {
 
 /* decode operands */
 
-static void decode_inst_operands(rv_instruction_info *dec) {
-  rv_inst inst = dec->inst;
-  dec->encodingType = opcode_data[dec->op].encodingType;
-  switch (dec->encodingType) {
+static void decode_inst_operands(rv_instInfo *instInfo) {
+  rv_inst inst = instInfo->inst;
+  instInfo->encodingType = opcode_data[instInfo->op].encodingType;
+  switch (instInfo->encodingType) {
   case rv_encodingType_none:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = rv_ireg_zero;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = 0;
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = rv_ireg_zero;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = 0;
     break;
   case rv_encodingType_u:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = rv_ireg_zero;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_imm20(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = rv_ireg_zero;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_imm20(inst);
     break;
   case rv_encodingType_uj:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = rv_ireg_zero;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_jimm20(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = rv_ireg_zero;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_jimm20(inst);
     break;
   case rv_encodingType_i:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_imm12(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_imm12(inst);
     break;
   case rv_encodingType_i_sh5:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_shamt5(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_shamt5(inst);
     break;
   case rv_encodingType_i_sh6:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_shamt6(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_shamt6(inst);
     break;
   case rv_encodingType_i_sh7:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_shamt7(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_shamt7(inst);
     break;
   case rv_encodingType_i_csr:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_csr12(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_csr12(inst);
     break;
   case rv_encodingType_s:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = operand_rs2(inst);
-    dec->imm = operand_simm12(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = operand_rs2(inst);
+    instInfo->imm = operand_simm12(inst);
     break;
   case rv_encodingType_sb:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = operand_rs2(inst);
-    dec->imm = operand_sbimm12(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = operand_rs2(inst);
+    instInfo->imm = operand_sbimm12(inst);
     break;
   case rv_encodingType_r:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = operand_rs2(inst);
-    dec->imm = 0;
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = operand_rs2(inst);
+    instInfo->imm = 0;
     break;
   case rv_encodingType_r_m:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = operand_rs2(inst);
-    dec->imm = 0;
-    dec->rm = operand_rm(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = operand_rs2(inst);
+    instInfo->imm = 0;
+    instInfo->rm = operand_rm(inst);
     break;
   case rv_encodingType_r4_m:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = operand_rs2(inst);
-    dec->rs3 = operand_rs3(inst);
-    dec->imm = 0;
-    dec->rm = operand_rm(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = operand_rs2(inst);
+    instInfo->rs3 = operand_rs3(inst);
+    instInfo->imm = 0;
+    instInfo->rm = operand_rm(inst);
     break;
   case rv_encodingType_r_a:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = operand_rs2(inst);
-    dec->imm = 0;
-    dec->aq = operand_aq(inst);
-    dec->rl = operand_rl(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = operand_rs2(inst);
+    instInfo->imm = 0;
+    instInfo->aq = operand_aq(inst);
+    instInfo->rl = operand_rl(inst);
     break;
   case rv_encodingType_r_l:
-    dec->rd = operand_rd(inst);
-    dec->rs1 = operand_rs1(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = 0;
-    dec->aq = operand_aq(inst);
-    dec->rl = operand_rl(inst);
+    instInfo->rd = operand_rd(inst);
+    instInfo->rs1 = operand_rs1(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = 0;
+    instInfo->aq = operand_aq(inst);
+    instInfo->rl = operand_rl(inst);
     break;
   case rv_encodingType_r_f:
-    dec->rd = dec->rs1 = dec->rs2 = rv_ireg_zero;
-    dec->pred = operand_pred(inst);
-    dec->succ = operand_succ(inst);
-    dec->imm = 0;
+    instInfo->rd = instInfo->rs1 = instInfo->rs2 = rv_ireg_zero;
+    instInfo->pred = operand_pred(inst);
+    instInfo->succ = operand_succ(inst);
+    instInfo->imm = 0;
     break;
   case rv_encodingType_cb:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = operand_crs1q(inst) + 8;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmb(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = operand_crs1q(inst) + 8;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmb(inst);
     break;
   case rv_encodingType_cb_imm:
-    dec->rd = dec->rs1 = operand_crs1rdq(inst) + 8;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmi(inst);
+    instInfo->rd = instInfo->rs1 = operand_crs1rdq(inst) + 8;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmi(inst);
     break;
   case rv_encodingType_cb_sh5:
-    dec->rd = dec->rs1 = operand_crs1rdq(inst) + 8;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmsh5(inst);
+    instInfo->rd = instInfo->rs1 = operand_crs1rdq(inst) + 8;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmsh5(inst);
     break;
   case rv_encodingType_cb_sh6:
-    dec->rd = dec->rs1 = operand_crs1rdq(inst) + 8;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmsh6(inst);
+    instInfo->rd = instInfo->rs1 = operand_crs1rdq(inst) + 8;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmsh6(inst);
     break;
   case rv_encodingType_ci:
-    dec->rd = dec->rs1 = operand_crs1rd(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmi(inst);
+    instInfo->rd = instInfo->rs1 = operand_crs1rd(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmi(inst);
     break;
   case rv_encodingType_ci_sh5:
-    dec->rd = dec->rs1 = operand_crs1rd(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmsh5(inst);
+    instInfo->rd = instInfo->rs1 = operand_crs1rd(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmsh5(inst);
     break;
   case rv_encodingType_ci_sh6:
-    dec->rd = dec->rs1 = operand_crs1rd(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmsh6(inst);
+    instInfo->rd = instInfo->rs1 = operand_crs1rd(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmsh6(inst);
     break;
   case rv_encodingType_ci_16sp:
-    dec->rd = rv_ireg_sp;
-    dec->rs1 = rv_ireg_sp;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimm16sp(inst);
+    instInfo->rd = rv_ireg_sp;
+    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimm16sp(inst);
     break;
   case rv_encodingType_ci_lwsp:
-    dec->rd = operand_crd(inst);
-    dec->rs1 = rv_ireg_sp;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmlwsp(inst);
+    instInfo->rd = operand_crd(inst);
+    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmlwsp(inst);
     break;
   case rv_encodingType_ci_ldsp:
-    dec->rd = operand_crd(inst);
-    dec->rs1 = rv_ireg_sp;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmldsp(inst);
+    instInfo->rd = operand_crd(inst);
+    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmldsp(inst);
     break;
   case rv_encodingType_ci_lqsp:
-    dec->rd = operand_crd(inst);
-    dec->rs1 = rv_ireg_sp;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmlqsp(inst);
+    instInfo->rd = operand_crd(inst);
+    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmlqsp(inst);
     break;
   case rv_encodingType_ci_li:
-    dec->rd = operand_crd(inst);
-    dec->rs1 = rv_ireg_zero;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmi(inst);
+    instInfo->rd = operand_crd(inst);
+    instInfo->rs1 = rv_ireg_zero;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmi(inst);
     break;
   case rv_encodingType_ci_lui:
-    dec->rd = operand_crd(inst);
-    dec->rs1 = rv_ireg_zero;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmui(inst);
+    instInfo->rd = operand_crd(inst);
+    instInfo->rs1 = rv_ireg_zero;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmui(inst);
     break;
   case rv_encodingType_ci_none:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = rv_ireg_zero;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = 0;
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = rv_ireg_zero;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = 0;
     break;
   case rv_encodingType_ciw_4spn:
-    dec->rd = operand_crdq(inst) + 8;
-    dec->rs1 = rv_ireg_sp;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimm4spn(inst);
+    instInfo->rd = operand_crdq(inst) + 8;
+    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimm4spn(inst);
     break;
   case rv_encodingType_cj:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = rv_ireg_zero;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmj(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = rv_ireg_zero;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmj(inst);
     break;
   case rv_encodingType_cj_jal:
-    dec->rd = rv_ireg_ra;
-    dec->rs1 = rv_ireg_zero;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmj(inst);
+    instInfo->rd = rv_ireg_ra;
+    instInfo->rs1 = rv_ireg_zero;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmj(inst);
     break;
   case rv_encodingType_cl_lw:
-    dec->rd = operand_crdq(inst) + 8;
-    dec->rs1 = operand_crs1q(inst) + 8;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmw(inst);
+    instInfo->rd = operand_crdq(inst) + 8;
+    instInfo->rs1 = operand_crs1q(inst) + 8;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmw(inst);
     break;
   case rv_encodingType_cl_ld:
-    dec->rd = operand_crdq(inst) + 8;
-    dec->rs1 = operand_crs1q(inst) + 8;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmd(inst);
+    instInfo->rd = operand_crdq(inst) + 8;
+    instInfo->rs1 = operand_crs1q(inst) + 8;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmd(inst);
     break;
   case rv_encodingType_cl_lq:
-    dec->rd = operand_crdq(inst) + 8;
-    dec->rs1 = operand_crs1q(inst) + 8;
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = operand_cimmq(inst);
+    instInfo->rd = operand_crdq(inst) + 8;
+    instInfo->rs1 = operand_crs1q(inst) + 8;
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = operand_cimmq(inst);
     break;
   case rv_encodingType_cr:
-    dec->rd = dec->rs1 = operand_crs1rd(inst);
-    dec->rs2 = operand_crs2(inst);
-    dec->imm = 0;
+    instInfo->rd = instInfo->rs1 = operand_crs1rd(inst);
+    instInfo->rs2 = operand_crs2(inst);
+    instInfo->imm = 0;
     break;
   case rv_encodingType_cr_mv:
-    dec->rd = operand_crd(inst);
-    dec->rs1 = operand_crs2(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = 0;
+    instInfo->rd = operand_crd(inst);
+    instInfo->rs1 = operand_crs2(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = 0;
     break;
   case rv_encodingType_cr_jalr:
-    dec->rd = rv_ireg_ra;
-    dec->rs1 = operand_crs1(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = 0;
+    instInfo->rd = rv_ireg_ra;
+    instInfo->rs1 = operand_crs1(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = 0;
     break;
   case rv_encodingType_cr_jr:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = operand_crs1(inst);
-    dec->rs2 = rv_ireg_zero;
-    dec->imm = 0;
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = operand_crs1(inst);
+    instInfo->rs2 = rv_ireg_zero;
+    instInfo->imm = 0;
     break;
   case rv_encodingType_cs:
-    dec->rd = dec->rs1 = operand_crs1rdq(inst) + 8;
-    dec->rs2 = operand_crs2q(inst) + 8;
-    dec->imm = 0;
+    instInfo->rd = instInfo->rs1 = operand_crs1rdq(inst) + 8;
+    instInfo->rs2 = operand_crs2q(inst) + 8;
+    instInfo->imm = 0;
     break;
   case rv_encodingType_cs_sw:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = operand_crs1q(inst) + 8;
-    dec->rs2 = operand_crs2q(inst) + 8;
-    dec->imm = operand_cimmw(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = operand_crs1q(inst) + 8;
+    instInfo->rs2 = operand_crs2q(inst) + 8;
+    instInfo->imm = operand_cimmw(inst);
     break;
   case rv_encodingType_cs_sd:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = operand_crs1q(inst) + 8;
-    dec->rs2 = operand_crs2q(inst) + 8;
-    dec->imm = operand_cimmd(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = operand_crs1q(inst) + 8;
+    instInfo->rs2 = operand_crs2q(inst) + 8;
+    instInfo->imm = operand_cimmd(inst);
     break;
   case rv_encodingType_cs_sq:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = operand_crs1q(inst) + 8;
-    dec->rs2 = operand_crs2q(inst) + 8;
-    dec->imm = operand_cimmq(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = operand_crs1q(inst) + 8;
+    instInfo->rs2 = operand_crs2q(inst) + 8;
+    instInfo->imm = operand_cimmq(inst);
     break;
   case rv_encodingType_css_swsp:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = rv_ireg_sp;
-    dec->rs2 = operand_crs2(inst);
-    dec->imm = operand_cimmswsp(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rs2 = operand_crs2(inst);
+    instInfo->imm = operand_cimmswsp(inst);
     break;
   case rv_encodingType_css_sdsp:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = rv_ireg_sp;
-    dec->rs2 = operand_crs2(inst);
-    dec->imm = operand_cimmsdsp(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rs2 = operand_crs2(inst);
+    instInfo->imm = operand_cimmsdsp(inst);
     break;
   case rv_encodingType_css_sqsp:
-    dec->rd = rv_ireg_zero;
-    dec->rs1 = rv_ireg_sp;
-    dec->rs2 = operand_crs2(inst);
-    dec->imm = operand_cimmsqsp(inst);
+    instInfo->rd = rv_ireg_zero;
+    instInfo->rs1 = rv_ireg_sp;
+    instInfo->rs2 = operand_crs2(inst);
+    instInfo->imm = operand_cimmsqsp(inst);
     break;
   };
 }
 
 /* decompress instruction */
 
-static void decode_inst_decompress(rv_instruction_info *dec, rv_isa isa) {
+static void decode_inst_decompress(rv_instInfo *instInfo, rv_isa isa) {
   int decomp_op;
   switch (isa) {
   case rv32:
-    decomp_op = opcode_data[dec->op].decomp_rv32;
+    decomp_op = opcode_data[instInfo->op].decomp_rv32;
     break;
   case rv64:
-    decomp_op = opcode_data[dec->op].decomp_rv64;
+    decomp_op = opcode_data[instInfo->op].decomp_rv64;
     break;
   case rv128:
-    decomp_op = opcode_data[dec->op].decomp_rv128;
+    decomp_op = opcode_data[instInfo->op].decomp_rv128;
     break;
   }
   if (decomp_op != rv_op_illegal) {
-    if ((opcode_data[dec->op].decomp_data & rvcd_imm_nz) && dec->imm == 0) {
-      dec->op = rv_op_illegal;
+    if ((opcode_data[instInfo->op].decomp_data & rvcd_imm_nz) &&
+        instInfo->imm == 0) {
+      instInfo->op = rv_op_illegal;
     } else {
-      dec->op = decomp_op;
-      dec->encodingType = opcode_data[decomp_op].encodingType;
+      instInfo->op = decomp_op;
+      instInfo->encodingType = opcode_data[decomp_op].encodingType;
     }
   }
 }
 
 /* check constraint */
 
-static bool check_constraints(rv_instruction_info *dec,
-                              const rvc_constraint *c) {
-  int32_t imm = dec->imm;
-  uint8_t rd = dec->rd, rs1 = dec->rs1, rs2 = dec->rs2;
+static bool check_constraints(rv_instInfo *instInfo, const rvc_constraint *c) {
+  int32_t imm = instInfo->imm;
+  uint8_t rd = instInfo->rd, rs1 = instInfo->rs1, rs2 = instInfo->rs2;
   while (*c != rvc_end) {
     switch (*c) {
     case rvc_rd_eq_ra:
@@ -3327,15 +3327,15 @@ static bool check_constraints(rv_instruction_info *dec,
 
 /* lift instruction to pseudo-instruction */
 
-static void decode_inst_lift_pseudo(rv_instruction_info *dec) {
-  const rv_comp_data *comp_data = opcode_data[dec->op].pseudo;
+static void decode_inst_lift_pseudo(rv_instInfo *instInfo) {
+  const rv_comp_data *comp_data = opcode_data[instInfo->op].pseudo;
   if (!comp_data) {
     return;
   }
   while (comp_data->constraints) {
-    if (check_constraints(dec, comp_data->constraints)) {
-      dec->op = comp_data->op;
-      dec->encodingType = opcode_data[dec->op].encodingType;
+    if (check_constraints(instInfo, comp_data->constraints)) {
+      instInfo->op = comp_data->op;
+      instInfo->encodingType = opcode_data[instInfo->op].encodingType;
       return;
     }
     comp_data++;
@@ -3357,31 +3357,31 @@ static void append(char *s1, const char *s2, ssize_t n) {
 #define INST_FMT_8 "%016" PRIx64 "  "
 
 static void decode_inst_format(char *buf, size_t buflen, size_t tab,
-                               rv_instruction_info *dec) {
+                               rv_instInfo *instInfo) {
   char tmp[64];
   const char *fmt;
 
-  size_t len = inst_length(dec->inst);
+  size_t len = inst_length(instInfo->inst);
   switch (len) {
   case 2:
-    snprintf(buf, buflen, INST_FMT_2, dec->inst);
+    snprintf(buf, buflen, INST_FMT_2, instInfo->inst);
     break;
   case 4:
-    snprintf(buf, buflen, INST_FMT_4, dec->inst);
+    snprintf(buf, buflen, INST_FMT_4, instInfo->inst);
     break;
   case 6:
-    snprintf(buf, buflen, INST_FMT_6, dec->inst);
+    snprintf(buf, buflen, INST_FMT_6, instInfo->inst);
     break;
   default:
-    snprintf(buf, buflen, INST_FMT_8, dec->inst);
+    snprintf(buf, buflen, INST_FMT_8, instInfo->inst);
     break;
   }
 
-  fmt = opcode_data[dec->op].format;
+  fmt = opcode_data[instInfo->op].format;
   while (*fmt) {
     switch (*fmt) {
     case 'O':
-      append(buf, opcode_data[dec->op].name, buflen);
+      append(buf, opcode_data[instInfo->op].name, buflen);
       break;
     case '(':
       append(buf, "(", buflen);
@@ -3393,55 +3393,55 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab,
       append(buf, ")", buflen);
       break;
     case '0':
-      append(buf, rv_ireg_name_sym[dec->rd], buflen);
+      append(buf, rv_ireg_name_sym[instInfo->rd], buflen);
       break;
     case '1':
-      append(buf, rv_ireg_name_sym[dec->rs1], buflen);
+      append(buf, rv_ireg_name_sym[instInfo->rs1], buflen);
       break;
     case '2':
-      append(buf, rv_ireg_name_sym[dec->rs2], buflen);
+      append(buf, rv_ireg_name_sym[instInfo->rs2], buflen);
       break;
     case '3':
-      append(buf, rv_freg_name_sym[dec->rd], buflen);
+      append(buf, rv_freg_name_sym[instInfo->rd], buflen);
       break;
     case '4':
-      append(buf, rv_freg_name_sym[dec->rs1], buflen);
+      append(buf, rv_freg_name_sym[instInfo->rs1], buflen);
       break;
     case '5':
-      append(buf, rv_freg_name_sym[dec->rs2], buflen);
+      append(buf, rv_freg_name_sym[instInfo->rs2], buflen);
       break;
     case '6':
-      append(buf, rv_freg_name_sym[dec->rs3], buflen);
+      append(buf, rv_freg_name_sym[instInfo->rs3], buflen);
       break;
     case '7':
-      snprintf(tmp, sizeof(tmp), "%d", dec->rs1);
+      snprintf(tmp, sizeof(tmp), "%d", instInfo->rs1);
       append(buf, tmp, buflen);
       break;
     case 'i':
-      snprintf(tmp, sizeof(tmp), "%d", dec->imm);
+      snprintf(tmp, sizeof(tmp), "%d", instInfo->imm);
       append(buf, tmp, buflen);
       break;
     case 'o':
-      snprintf(tmp, sizeof(tmp), "%d", dec->imm);
+      snprintf(tmp, sizeof(tmp), "%d", instInfo->imm);
       append(buf, tmp, buflen);
       while (strlen(buf) < tab * 2) {
         append(buf, " ", buflen);
       }
-      snprintf(tmp, sizeof(tmp), "# 0x%x" PRIx64, dec->imm);
+      snprintf(tmp, sizeof(tmp), "# 0x%x" PRIx64, instInfo->imm);
       append(buf, tmp, buflen);
       break;
     case 'c': {
-      const char *name = csr_name(dec->imm & 0xfff);
+      const char *name = csr_name(instInfo->imm & 0xfff);
       if (name) {
         append(buf, name, buflen);
       } else {
-        snprintf(tmp, sizeof(tmp), "0x%03x", dec->imm & 0xfff);
+        snprintf(tmp, sizeof(tmp), "0x%03x", instInfo->imm & 0xfff);
         append(buf, tmp, buflen);
       }
       break;
     }
     case 'r':
-      switch (dec->rm) {
+      switch (instInfo->rm) {
       case rv_rm_rne:
         append(buf, "rne", buflen);
         break;
@@ -3466,30 +3466,30 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab,
       }
       break;
     case 'p':
-      if (dec->pred & rv_fence_i) {
+      if (instInfo->pred & rv_fence_i) {
         append(buf, "i", buflen);
       }
-      if (dec->pred & rv_fence_o) {
+      if (instInfo->pred & rv_fence_o) {
         append(buf, "o", buflen);
       }
-      if (dec->pred & rv_fence_r) {
+      if (instInfo->pred & rv_fence_r) {
         append(buf, "r", buflen);
       }
-      if (dec->pred & rv_fence_w) {
+      if (instInfo->pred & rv_fence_w) {
         append(buf, "w", buflen);
       }
       break;
     case 's':
-      if (dec->succ & rv_fence_i) {
+      if (instInfo->succ & rv_fence_i) {
         append(buf, "i", buflen);
       }
-      if (dec->succ & rv_fence_o) {
+      if (instInfo->succ & rv_fence_o) {
         append(buf, "o", buflen);
       }
-      if (dec->succ & rv_fence_r) {
+      if (instInfo->succ & rv_fence_r) {
         append(buf, "r", buflen);
       }
-      if (dec->succ & rv_fence_w) {
+      if (instInfo->succ & rv_fence_w) {
         append(buf, "w", buflen);
       }
       break;
@@ -3499,12 +3499,12 @@ static void decode_inst_format(char *buf, size_t buflen, size_t tab,
       }
       break;
     case 'A':
-      if (dec->aq) {
+      if (instInfo->aq) {
         append(buf, ".aq", buflen);
       }
       break;
     case 'R':
-      if (dec->rl) {
+      if (instInfo->rl) {
         append(buf, ".rl", buflen);
       }
       break;
@@ -3533,7 +3533,7 @@ void inst_fetch(const uint8_t *data, rv_inst *instp, size_t *length) {
 
 void disasmInst(uint8_t *buf, size_t buflen, rv_isa isa, rv_inst inst,
                 uint64_t pc) {
-  rv_instruction_info dec = {.inst = inst};
+  rv_instInfo dec = {.inst = inst};
   decode_inst_opcode(&dec, isa);
   decode_inst_operands(&dec);
   // Whether to display compression instructions
