@@ -502,10 +502,10 @@ typedef struct {
   const rv_type type;
   const char *const format;
   const rv_compData *pseudo;
-  const short decomp_rv32;
-  const short decomp_rv64;
-  const short decomp_rv128;
-  const short decomp_data;
+  const short decompression_rv32;
+  const short decompression_rv64;
+  const short decompression_rv128;
+  const short decompression_data;
 } rv_opcodeData;
 
 /* register names */
@@ -3161,25 +3161,25 @@ static void rv_inst_oprands(rv_instInfo *instInfo) {
 /* decompress instruction */
 
 static void rv_inst_decompress(rv_instInfo *instInfo, rv_isa isa) {
-  int decomp_op;
+  int decompression_op;
   switch (isa) {
   case rv32:
-    decomp_op = opcode_data[instInfo->op].decomp_rv32;
+    decompression_op = opcode_data[instInfo->op].decompression_rv32;
     break;
   case rv64:
-    decomp_op = opcode_data[instInfo->op].decomp_rv64;
+    decompression_op = opcode_data[instInfo->op].decompression_rv64;
     break;
   case rv128:
-    decomp_op = opcode_data[instInfo->op].decomp_rv128;
+    decompression_op = opcode_data[instInfo->op].decompression_rv128;
     break;
   }
-  if (decomp_op != op_illegal) {
-    if ((opcode_data[instInfo->op].decomp_data & rvcd_imm_nz) &&
+  if (decompression_op != op_illegal) {
+    if ((opcode_data[instInfo->op].decompression_data & rvcd_imm_nz) &&
         instInfo->imm == 0) {
       instInfo->op = op_illegal;
     } else {
-      instInfo->op = decomp_op;
-      instInfo->type = opcode_data[decomp_op].type;
+      instInfo->op = decompression_op;
+      instInfo->type = opcode_data[decompression_op].type;
     }
   }
 }
