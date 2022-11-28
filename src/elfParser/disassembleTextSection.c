@@ -3296,10 +3296,14 @@ static void rv_inst_pseudo(rv_instInfo *instInfo) {
 /* format instruction */
 
 static void append(char *s1, const char *s2, size_t n) {
+  /* The strlen function returns the number of characters that precede the
+   * terminating null character. */
   size_t s1Len = strlen(s1);
-  if (n - s1Len - 1 > 0) {
+  size_t s2Len = strlen(s2);
+  if (n - s1Len - s2Len - 1 >= 0) {
     strncat(s1, s2, n - s1Len);
-  }
+  } else
+    fprintf(stderr, "buffer overflow");
 }
 
 #define INST_LEN_2 ("%04h" PRIx16 "              ")
