@@ -8,7 +8,7 @@
                         "type": "lldb",
                         "request": "launch",
                         "name": "Debug",
-                        "program": "${workspaceFolder}/src/readelf/readelf-riscv",
+                        "program": "${workspaceFolder}/src/elfParser/elfParser",
                         "args": [
                                 "/home/user/riscv-coremark/coremark.bare.riscv.a510Gcc"
                         ],
