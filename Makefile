@@ -5,6 +5,8 @@ BUILDPATH=$(TOPDIR)/build
 
 #LIBPATH=$(TOPDIR)/lib
 #export BINPATH BUILDPATH
+export PATH=$(shell printenv PATH):/home/user/Downloads/tools/daily/bin
+#export PATH=$(PATH):/home/user/Downloads/tools/daily/bin
 
 exclude_dirs= out build include
 export exclude_dirs
@@ -38,14 +40,15 @@ riscvElfParser-coremark : riscvElf $(TOPDIR)/build/src/elfParser/elfParser
 	qemu-riscv64 $(TOPDIR)/build/src/elfParser/elfParser /home/user/riscv-coremark/coremark.bare.riscv.a510Gcc
 
 riscvElf : clean
-	make CC=/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror -march=rv64gc -mabi=lp64d" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
+	echo $(PATH)
+	make CC=riscv64-unknown-linux-gnu-gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror -march=rv64gc -mabi=lp64d" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
 
 x86Elf : clean
 	make CC=gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
 
 riscvDisassembly : riscvElf $(TOPDIR)/build/src/elfParser/elfParser
-	/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-objdump -drswtaxzD -WF -Wf -M no-aliases $(TOPDIR)/build/src/elfParser/elfParser > $(TOPDIR)/build/src/elfParser/elfParser.objdump.txt
-	/home/user/Downloads/daily/bin/riscv64-unknown-linux-gnu-readelf --debug-dump=info --debug-dump=str -aW $(TOPDIR)/build/src/elfParser/elfParser > $(TOPDIR)/build/src/elfParser/elfParser.readelf.txt
+	riscv64-unknown-linux-gnu-objdump -drswtaxzD -WF -Wf -M no-aliases $(TOPDIR)/build/src/elfParser/elfParser > $(TOPDIR)/build/src/elfParser/elfParser.objdump.txt
+	riscv64-unknown-linux-gnu-readelf --debug-dump=info --debug-dump=str -aW $(TOPDIR)/build/src/elfParser/elfParser > $(TOPDIR)/build/src/elfParser/elfParser.readelf.txt
 
 x86Disassembly : x86Elf $(TOPDIR)/build/src/elfParser/elfParser
 	objdump -drswtaxzD -WF -Wf -M no-aliases $(TOPDIR)/build/src/elfParser/elfParser > $(TOPDIR)/build/src/elfParser/elfParser.objdump.txt
