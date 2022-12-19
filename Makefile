@@ -41,7 +41,7 @@ riscvElfParser-coremark : riscvElf $(TOPDIR)/build/src/elfParser/elfParser
 
 riscvElf : clean
 	echo $(PATH)
-	make CC=riscv64-unknown-linux-gnu-gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror -march=rv64gc -mabi=lp64d" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
+	make CC=riscv64-unknown-linux-gnu-gcc CFLAGS="-g3 -ggdb3 -gvariable-location-views -gdwarf-4 -grecord-gcc-switches -O1 -Werror -march=rv64gc -mabi=lp64d" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
 
 x86Elf : clean
 	make CC=gcc CFLAGS="-g3 -ggdb -gdwarf -O0 -Werror" LDFLAGS="-static" -f $(TOPDIR)/Makefile.mk all
